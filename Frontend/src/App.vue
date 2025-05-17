@@ -65,3 +65,18 @@ function onMouseUp() {
   </div>
 </template>
 
+
+
+<style scoped>
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  transition: margin 0.4s cubic-bezier(.77,0,.18,1);
+}
+.with-panel {
+  margin-right: 170px; /* Half the width of the side panel for visual balance */
+}
+</style>

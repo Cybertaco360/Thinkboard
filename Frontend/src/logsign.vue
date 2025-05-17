@@ -1,11 +1,11 @@
 <template>
   <div class="center-container">
-    <img src="./assets/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
+    <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="rectangles-container">
       <div class="rounded-rectangle">
         <div class="bottom-label">Sign Up</div>
       </div>
-      <div class="rounded-rectangle">
+      <div class="rounded-rectangle" @click="$emit('open-sidepan')">
         <div class="bottom-label">Log In</div>
       </div>
     </div>
@@ -18,16 +18,17 @@
   width: 100vw;
   display: flex;
   flex-direction: column;
-  align-items: center;    /* centers horizontally */
-  justify-content: center; /* centers vertically */
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .logo {
-  width: 420px;
+  width: 500px;
   display: block;
   object-fit: contain;
-  margin-bottom: 90px;
-  align-self: center; /* Ensures logo is centered */
+  margin-bottom: 40px;
 }
 
 .rectangles-container {
@@ -35,12 +36,11 @@
   justify-content: center;
   align-items: center;
   gap: 24px;
-  align-self: center; /* Ensures rectangles are centered */
 }
 
 .rounded-rectangle {
-  width: 200px;
-  height: 80px;
+  width: 240px;
+  height: 90px;
   background: #80A4F9;
   border-radius: 24px;
   display: flex;
@@ -59,16 +59,10 @@
 
 .bottom-label {
   font-size: 2em;
-  color: #222;
+  color: #fff;
   font-weight: bold;
   text-align: center;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-:global(body) {
-  background: #fff;
+  margin-bottom: 10px;
 }
 </style>
