@@ -2,17 +2,37 @@
   <transition name="slide">
     <div v-if="visible" class="side-panel">
       <button class="close-btn" @click="emit('close')" aria-label="Close">&times;</button>
-      <h2 class="panel-title">Log In</h2>
-      <form @submit.prevent="handleSubmit">
+      <h2 class="panel-title">{{ type === 'signup' ? 'Sign Up' : 'Log In' }}</h2>
+      <form v-if="type === 'login'" @submit.prevent="handleLogin">
         <label>
           Email
-          <input type="email" v-model="email" required />
+          <input type="email" v-model="loginEmail" required />
         </label>
         <label>
           Password
-          <input type="password" v-model="password" required />
+          <input type="password" v-model="loginPassword" required />
         </label>
         <button class="confirm-btn" type="submit">Confirm</button>
+      </form>
+      <form v-else @submit.prevent="handleSignup">
+        <label>
+          Full Name
+          <input type="text" v-model="signupName" required />
+        </label>
+        <label>
+          Email
+          <input type="email" v-model="signupEmail" required />
+        </label>
+        <label>
+          Password
+          <input type="password" v-model="signupPassword" required />
+        </label>
+        <label>
+          Confirm Password
+          <input type="password" v-model="signupPassword2" required />
+        </label>
+        <button class="confirm-btn" type="submit">Sign Up</button>
+        <div v-if="signupError" class="error-msg">{{ signupError }}</div>
       </form>
     </div>
   </transition>
@@ -20,33 +40,74 @@
 
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
-const props = defineProps({ visible: Boolean });
+const props = defineProps({ visible: Boolean, type: String });
 const emit = defineEmits(['close']);
 
-const email = ref('');
-const password = ref('');
+// Log In
+const loginEmail = ref('');
+const loginPassword = ref('');
 
-function handleSubmit() {
-  // Create a JSON object with the form data
+// Sign Up
+const signupName = ref('');
+const signupEmail = ref('');
+const signupPassword = ref('');
+const signupPassword2 = ref('');
+const signupError = ref('');
+
+async function handleLogin() {
   const data = {
-    email: email.value,
-    password: password.value
+    email: loginEmail.value,
+    password: loginPassword.value
   };
+  const response = await fetch('http://localhost:8080/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
 
-  // Convert to JSON string
+  if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
+      alert('Login successful!');
+    } else {
+      alert('Login failed: ' + result.message);
+    }
+  } else {
+    alert('Network error: ' + response.statusText);
+  }
+  emit('close');
+}
+
+async function handleSignup() {
+  if (signupPassword.value !== signupPassword2.value) {
+    signupError.value = "Passwords do not match!";
+    return;
+  }
+  signupError.value = "";
+  const data = {
+    id: generateId(),
+    name: signupName.value,
+    email: signupEmail.value,
+    password: signupPassword.value
+  };
+  downloadJSON(data, 'signup-info.json');
+  emit('close');
+}
+
+function downloadJSON(data, filename) {
   const json = JSON.stringify(data, null, 2);
-
-  // Create a blob and trigger download
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'login-info.json';
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
 
-  emit('close');
+function generateId() {
+  // Simple random ID (8 chars)
+  return Math.random().toString(36).substring(2, 10);
 }
 </script>
 
@@ -135,6 +196,16 @@ input:focus {
 
 .confirm-btn:hover {
   background: #29304d;
+}
+
+.error-msg {
+  color: #ffd6d6;
+  background: #b33a3a;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 1em;
 }
 
 /* Slide transition */

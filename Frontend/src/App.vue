@@ -1,22 +1,24 @@
 <script setup>
 import { ref } from 'vue';
 import Cloud from './cloud.vue';
-import rectangle from "./components/rectanglenode.vue";
-import allancolumn1 from "./components/allancolumn1.vue";
-import SidePan from './sidepan.vue';
 import LogSign from './logsign.vue';
-const showSidePan = ref(false);
-const signin = ref(false);
-</script>
+import SidePan from './sidepan.vue';
 
+const showSidePan = ref(false);
+const panelType = ref('login'); // 'login' or 'signup'
+function openPanel(type) {
+  panelType.value = type;
+  showSidePan.value = true;
+}
+</script>
 
 <template>
   <div style="position:relative; min-height:100vh; width:100vw; overflow:hidden;">
     <Cloud />
     <div :class="['main-content', { 'with-panel': showSidePan }]">
-      <LogSign @open-sidepan="showSidePan = true" />
+      <LogSign @open-sidepan="() => openPanel('login')" @open-signup="() => openPanel('signup')" />
     </div>
-    <SidePan :visible="showSidePan" @close="showSidePan = false" />
+    <SidePan :visible="showSidePan" :type="panelType" @close="showSidePan = false" />
   </div>
 </template>
 

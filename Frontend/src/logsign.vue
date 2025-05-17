@@ -2,7 +2,7 @@
   <div class="center-container">
     <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="rectangles-container">
-      <div class="rounded-rectangle">
+      <div class="rounded-rectangle" @click="$emit('open-signup')">
         <div class="bottom-label">Sign Up</div>
       </div>
       <div class="rounded-rectangle" @click="$emit('open-sidepan')">
