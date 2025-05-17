@@ -3,10 +3,10 @@
   <div class="center-container">
     <div class="rectangles-container">
       <div class="rounded-rectangle" @click="$emit('open-signup')">
-        <div class="bottom-label">Sign Up</div>
+        <div class="bottom-label">Log In</div>
       </div>
       <div class="rounded-rectangle" @click="$emit('open-sidepan')">
-        <div class="bottom-label">Log In</div>
+        <div class="bottom-label">Sign Up</div>
       </div>
     </div>
   </div>
