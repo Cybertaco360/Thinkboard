@@ -1,5 +1,5 @@
 <template>
-  <div class="input-container">
+  <div class="input-wrapper">
     <input
       v-model="inputText"
       class="text-input"
@@ -14,7 +14,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Send } from 'lucide-vue-next';
+import { Send } from 'lucide-vue-next'; // Let's try the simpler Send icon first
 
 const inputText = ref('');
 
@@ -51,8 +51,8 @@ async function GeminiBackendQuery() {
 }
 
 .text-input {
-  width: 90%;
-  padding-right: 16px;
+  width: 100%;
+  padding-right: 40px; /* Make room for the button */
   padding-left: 16px;
   padding-top:8px;
   padding-bottom: 8px;
@@ -64,16 +64,16 @@ async function GeminiBackendQuery() {
   color: #222;
 }
 
-.input-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #f5f7fa;
-  padding: 4px;
-  border-radius: 20px;
+.input-wrapper {
+  position: relative;
+  width: 100%;
 }
 
 .send-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
@@ -82,11 +82,10 @@ async function GeminiBackendQuery() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: color 0.2s;
 }
 
 .send-button:hover {
-  background-color: #e0e0e0;
+  color: #222;
 }
 </style>
