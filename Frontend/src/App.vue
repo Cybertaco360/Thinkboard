@@ -17,26 +17,18 @@ const handleLogin = () => {
   showSidePan.value = false;
 };
 
-async function GeminiBackendQuery() {
+async function GeminiBackendQuery(text) {
   const response = await fetch('http://localhost:8080/generate', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ prompt: inputText.value }) // Use 'prompt' to match backend
+    body: JSON.stringify({ prompt: text })
   });
 
   if (response.ok) {
     const data = await response.json();
-    // Assuming the response is an array or object matching your schema
-    // Emit an event or update a global store, or directly update nodes if accessible
-    // Example: this.$emit('nodes-update', data);
-    // Or, if using a global store or prop:
-    // nodes.value = Array.isArray(data) ? data : [data];
-    // For demo, just log:
-    console.log('Received nodes:', data);
-    // If you want to update nodes in App.vue, emit an event:
-    // emit('nodes-update', data);
+    nodes.splice(0, nodes.length, ...data); // Update nodes array with new data
   } else {
     console.error('Error:', response.statusText);
   }

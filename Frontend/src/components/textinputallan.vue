@@ -19,21 +19,41 @@ import { Send } from 'lucide-vue-next'; // Let's try the simpler Send icon first
 const emit = defineEmits(['nodes-update']);
 const inputText = ref('');
 
-async function GeminiBackendQuery() {
-  const response = await fetch('http://localhost:8080/generate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ text: inputText.value })
-  });
+function validateNodeSchema(data) {
+  // Handle both array and single object responses
+  const nodeArray = Array.isArray(data) ? data : [data];
+  
+  return nodeArray.map((node, index) => ({
+    node_id: node.node_id || index,
+    x: node.x || 100,
+    y: node.y || (100 + index * 150),
+    text: node.text || 'Unknown',
+    connected: Array.isArray(node.connected) ? node.connected : [],
+    information: node.information || ''
+  }));
+}
 
-  if (response.ok) {
-    const data = await response.json();
-    emit('nodes-update', Array.isArray(data) ? data : [data]);
-    console.log(data)
-  } else {
-    console.error('Error:', response.statusText);
+async function GeminiBackendQuery() {
+  try {
+    const response = await fetch('http://localhost:8080/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt: inputText.value })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const validatedNodes = validateNodeSchema(data);
+      emit('nodes-update', validatedNodes);
+      console.log('Validated nodes:', validatedNodes);
+    } else {
+      const error = await response.json();
+      console.error('API Error:', error);
+    }
+  } catch (error) {
+    console.error('Error processing response:', error);
   }
 }
 

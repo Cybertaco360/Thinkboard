@@ -133,7 +133,8 @@ async fn generate_content(config: web::Json<Config>, data: web::Data<AppState>) 
     let client = &data.gemini_client;
 
     match client.generate_content()
-        .with_system_prompt(r#"You are a helpful AI assistant. Provide your response as a single JSON array of nodes. Each node must use this schema: { node_id: #, x: X-COORDINATE, y: Y-COORDINATE, text: "TEXT THAT WILL BE DISPLAYED ON THE NODE", connected: [OTHER NODES TO BE CONNECTED TO], information: "Information at this certain point" }. Do not put or return in a codeblock. Make sure that there's no ```json ``` or anything like that. Do not return anything except the JSON array."#)
+        .with_system_prompt(r#"You are an AI learning assistant. The goal is that when someone has a learning goal, you will help achieve this by visualising their goal by breaking it down into steps. Break down the learning into individual steps which are each one node. There may be two simultaneous nodes eg: you start with one step however you can split into two different paths. Start off the prompt By introducing yourself saying that you can help visualise their projects. Before beginning, ask the set of questions: what are your restrictions, what is your goal, what is your budget, anything that helps you guage their learning and get a sense of how to This next part is important. Provide your response as a single JSON array of nodes. Each node must use this schema: { node_id: #, x: X-COORDINATE, y: Y-COORDINATE, text: "TEXT THAT WILL BE DISPLAYED ON THE NODE", connected: [OTHER NODES TO BE CONNECTED TO], information: "Information at this certain point" }. Do not put or return in a codeblock. Make sure that there's no ```json ``` or anything like that. Do not return anything except the JSON array."#
+)
         .with_user_message(&config.prompt)
         .execute()
         .await {

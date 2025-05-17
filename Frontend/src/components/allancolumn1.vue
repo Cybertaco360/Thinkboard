@@ -1,8 +1,5 @@
 <template>
-  <div :class="['left-column', { 'collapsed': isCollapsed }]">
-    <button class="toggle-button" @click="isCollapsed = !isCollapsed">
-      <ChevronLeft :class="{ 'rotate': !isCollapsed }" />
-    </button>
+  <div class="left-column">
     <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="ai-assistant">
       <Circularallan/>
@@ -17,21 +14,25 @@
     </div>
   </div>
 
-  <div>
-    <div v-for="node in nodes" :key="node.node_id" class="node">
-      <strong>{{ node.text }}</strong>
-      <div>{{ node.information }}</div>
-      <div>Connected to: {{ node.connected.join(', ') }}</div>
-      <div>Position: ({{ node.x }}, {{ node.y }})</div>
-    </div>
+  <div class="nodes-container">
+    <rectangle
+      v-for="node in nodes"
+      :key="node.node_id"
+      :node="node"
+      :style="{
+        position: 'absolute',
+        left: `${node.x}px`,
+        top: `${node.y}px`
+      }"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { ChevronLeft } from 'lucide-vue-next';
 import Circularallan from './Circularallan.vue';
 import Textinputallan from './textinputallan.vue';
+import rectangle from './rectanglenode.vue';
 
 defineProps({ nodes: Array });
 const emit = defineEmits(['nodes-update']);
@@ -49,7 +50,7 @@ const emit = defineEmits(['nodes-update']);
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 400px;
   height: 100vh;
   background-color: #D4E1FE;
   border-top-right-radius: 32px;
@@ -58,11 +59,6 @@ const emit = defineEmits(['nodes-update']);
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width 0.3s ease-in-out;
-}
-
-.left-column.collapsed {
-  width: 400px;
 }
 
 .nav-container {
@@ -138,5 +134,19 @@ const emit = defineEmits(['nodes-update']);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.5px;
+}
+
+.nodes-container {
+  position: fixed;
+  top: 0;
+  left: 400px;
+  width: calc(100% - 400px);
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.nodes-container > * {
+  pointer-events: auto;
 }
 </style>
