@@ -279,8 +279,7 @@ async fn sign_up(credentials: web::Json<SignUpRequest>) -> impl Responder {
     }
 
     // Create new user
-    let user_idexit
-     = uuid::Uuid::new_v4().to_string();
+    let user_id = uuid::Uuid::new_v4().to_string();
     let now = Utc::now().to_rfc3339();
     let new_user = UserInfo {
         id: user_id.clone(),
