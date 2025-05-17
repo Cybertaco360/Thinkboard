@@ -1,6 +1,8 @@
 extern crate dotenv;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::http::header;
+use actix_cors::Cors;
 use std::collections::HashMap;
 use std::future::IntoFuture;
 use serde::{Serialize,Deserialize};
@@ -13,6 +15,8 @@ use std::path::Path;
 use std::fs;
 use mongodb::bson::doc;
 use mongodb::bson::DateTime;
+
+
 #[derive(Deserialize)]
 struct Config {
     prompt: String,
@@ -95,7 +99,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // Start the web server
     HttpServer::new(move || {
+let cors = Cors::default()
+    .allowed_origin("http://localhost:5173")
+    .allowed_methods(vec!["GET", "POST"])
+    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+    .allowed_header(header::CONTENT_TYPE)
+    .max_age(3600);
+
         App::new()
+        .wrap(cors)
             .app_data(web::Data::new(AppState {
                 gemini_client: client.clone(),
             }))
