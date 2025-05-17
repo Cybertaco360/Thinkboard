@@ -1,6 +1,7 @@
 <script setup>
 import rectangle from "./components/rectanglenode.vue";
 import allancolumn1 from "./components/allancolumn1.vue";
+import Circularallan from "./components/Circularallan.vue";
 </script>
 
 <template>
@@ -8,6 +9,8 @@ import allancolumn1 from "./components/allancolumn1.vue";
   <div>
     <rectangle></rectangle>
     <allancolumn1></allancolumn1>
+    <canvas-wrapper></canvas-wrapper>
+      <Circularallan></Circularallan>
   </div>
 </template>
 

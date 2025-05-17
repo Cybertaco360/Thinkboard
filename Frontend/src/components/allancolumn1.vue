@@ -1,45 +1,41 @@
 <template>
-  <div class="allancolumn1">
+  <div class="left-column">
     <div class="logo-container">
       <h1 class="logo">Thinkboard</h1>
     </div>
-    
+
     <div class="ai-assistant">
-      <div class="ai-circle">
-        <div class="ai-pulse-container">
-          <div class="ai-pulse"></div>
-          <div class="ai-pulse"></div>
-          <div class="ai-pulse"></div>
-          <div class="ai-pulse"></div>
-          <div class="ai-pulse"></div>
-        </div>
-      </div>
+      <Circularallan />
       <div class="ai-text">AI Assistant</div>
     </div>
-    
+
     <div class="nav-container">
       <!-- Navigation content can go here -->
     </div>
-    
     <div class="footer-container">
       <p class="version">Thinkboard v1.0</p>
     </div>
   </div>
 </template>
+
+<script setup>
+import Circularallan from './Circularallan.vue';
+</script>
+
 <style scoped>
-.allancolumn1 {
-  width: 280px; /* More reasonable width */
-  height: 100vh;
-  background-color: #2c3e50; /* Darker, more professional color */
+.left-column {
   position: fixed;
-  left: 0;
   top: 0;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  left: 0;
+  width: 400px;
+  height: 100vh;
+  background-color: #BACFFD; /* Change this color as you like */
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  border-radius: 0; /* Remove the border radius for a cleaner look */
-  color: #ecf0f1;
-  font-family: 'Roboto', Arial, sans-serif;
+  z-index: 100;
 }
 
 .logo-container {
