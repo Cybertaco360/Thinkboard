@@ -1,16 +1,20 @@
 <template>
-  <div class="rectangle">
+  <div class="input-wrapper">
     <input
       v-model="inputText"
       class="text-input"
       type="text"
       placeholder="let's create!"
     />
+    <button class="send-button" @click="GeminiBackendQuery">
+      <Send size="20" />
+    </button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { Send } from 'lucide-vue-next'; // Let's try the simpler Send icon first
 
 const inputText = ref('');
 
@@ -20,7 +24,7 @@ async function GeminiBackendQuery() {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ text: inputText.value })
+    body: JSON.stringify({ "prompt": inputText.value })
   });
 
   if (response.ok) {
@@ -48,15 +52,40 @@ async function GeminiBackendQuery() {
 
 .text-input {
   width: 90%;
-  padding-right: 12px;
-  padding-left: 12px;
+  padding-right: 25px; /* Make room for the button */
+  padding-left: 16px;
   padding-top:8px;
   padding-bottom: 8px;
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   font-size: 1.1rem;
   outline: none;
   background: #f5f7fa;
+  color: #222;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.send-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.send-button:hover {
   color: #222;
 }
 </style>
