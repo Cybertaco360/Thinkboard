@@ -13,9 +13,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 import { Send } from 'lucide-vue-next'; // Let's try the simpler Send icon first
 
+const emit = defineEmits(['nodes-update']);
 const inputText = ref('');
 
 async function GeminiBackendQuery() {
@@ -24,12 +25,13 @@ async function GeminiBackendQuery() {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ "prompt": inputText.value })
+    body: JSON.stringify({ text: inputText.value })
   });
 
   if (response.ok) {
     const data = await response.json();
-    console.log(data);
+    emit('nodes-update', Array.isArray(data) ? data : [data]);
+    console.log(data)
   } else {
     console.error('Error:', response.statusText);
   }

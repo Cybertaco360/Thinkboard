@@ -43,7 +43,8 @@ import { defineProps, defineEmits, ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 const userStore = useUserStore();
 const props = defineProps({ visible: Boolean, type: String });
-const emit = defineEmits(['close']);
+// Add 'login-success' to the emits array
+const emit = defineEmits(['close', 'login-success']);
 
 // Log In
 const loginEmail = ref('');

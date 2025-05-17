@@ -131,25 +131,37 @@ async fn hello() -> impl Responder {
 #[post("/generate")]
 async fn generate_content(config: web::Json<Config>, data: web::Data<AppState>) -> impl Responder {
     let client = &data.gemini_client;
-    
+
     match client.generate_content()
-        .with_system_prompt("You are a helpful AI assistant. Provide clear, concise, and accurate responses.")
+        .with_system_prompt(r#"You are a helpful AI assistant. Provide your response as a single JSON array of nodes. Each node must use this schema: { node_id: #, x: X-COORDINATE, y: Y-COORDINATE, text: "TEXT THAT WILL BE DISPLAYED ON THE NODE", connected: [OTHER NODES TO BE CONNECTED TO], information: "Information at this certain point" }. Do not put or return in a codeblock. Make sure that there's no ```json ``` or anything like that. Do not return anything except the JSON array."#)
         .with_user_message(&config.prompt)
         .execute()
         .await {
             Ok(response) => {
-                web::Json(Response {
-                    message: response.text(),
-                })
+                let mut text = response.text();
+                // Try to parse as JSON array first
+                let try_parse = serde_json::from_str::<serde_json::Value>(&text);
+                if try_parse.is_ok() {
+                    return web::Json(try_parse.unwrap());
+                }
+                // If not, try to wrap in brackets and parse as array
+                if text.trim().starts_with('{') && text.trim().ends_with('}') {
+                    text = format!("[{}]", text);
+                }
+                match serde_json::from_str::<serde_json::Value>(&text) {
+                    Ok(json) => web::Json(json),
+                    Err(_) => {
+                        println!("{}", response.text());
+                        web::Json(serde_json::json!({ "error": "Invalid schema from Gemini" }))
+                    }
+                }
             },
             Err(e) => {
-                // Handle errors if the API call fails
-                web::Json(Response {
-                    message: format!("Error generating content: {}", e),
-                })
+                web::Json(serde_json::json!({ "error": format!("API call failed: {}", e) }))
             }
         }
 }
+
 #[post("/login")]
 async fn sign_in(credentials: web::Json<SignInRequest>, data: web::Data<AppState>) -> impl Responder {
     // Get MongoDB connection string from environment

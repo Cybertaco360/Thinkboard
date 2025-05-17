@@ -16,6 +16,15 @@
       <Textinputallan />
     </div>
   </div>
+
+  <div>
+    <div v-for="node in nodes" :key="node.node_id" class="node">
+      <strong>{{ node.text }}</strong>
+      <div>{{ node.information }}</div>
+      <div>Connected to: {{ node.connected.join(', ') }}</div>
+      <div>Position: ({{ node.x }}, {{ node.y }})</div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -24,7 +33,8 @@ import { ChevronLeft } from 'lucide-vue-next';
 import Circularallan from './Circularallan.vue';
 import Textinputallan from './textinputallan.vue';
 
-const isCollapsed = ref(false);
+defineProps({ nodes: Array });
+const emit = defineEmits(['nodes-update']);
 </script>
 
 <style scoped>
@@ -128,36 +138,5 @@ const isCollapsed = ref(false);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.5px;
-}
-
-.toggle-button {
-  position: fixed;
-  right: -40px;
-  top: 20px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #ff0000;
-  border: 2px solid #0051ff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 101;
-  transition: all 0.3s ease;
-  color: #4a7bff;
-}
-
-.toggle-button:hover {
-  background: #4a7bff;
-  color: white;
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(74, 123, 255, 0.3);
-}
-
-.toggle-button .rotate {
-  transition: transform 0.3s ease;
-  transform: rotate(180deg);
 }
 </style>

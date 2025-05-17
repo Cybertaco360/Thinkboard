@@ -29,13 +29,7 @@
 </template>
 
 <script setup>
-function scrollDown() {
-  window.scrollTo({
-    top: window.scrollY + window.innerHeight,
-    left: 0,
-    behavior: 'smooth'
-  });
-}
+const emit = defineEmits(['open-sidepan', 'open-signup']);
 </script>
 
 <style scoped>
