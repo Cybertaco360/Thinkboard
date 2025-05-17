@@ -1,17 +1,14 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import rectangle from "./components/rectanglenode.vue";
+import allancolumn1 from "./components/allancolumn1.vue";
 </script>
 
 <template>
+
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <rectangle></rectangle>
+    <allancolumn1></allancolumn1>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
@@ -20,9 +17,10 @@ import HelloWorld from './components/HelloWorld.vue'
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em #9fbaf5);
 }
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
