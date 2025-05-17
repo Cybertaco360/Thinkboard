@@ -153,6 +153,7 @@ async function handleLogin() {
   z-index: 100;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
+  padding: 50px;
 }
 
 .close-btn {
