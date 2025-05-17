@@ -150,7 +150,7 @@ async fn generate_content(config: web::Json<Config>, data: web::Data<AppState>) 
             }
         }
 }
-#[post("/signin")]
+#[post("/login")]
 async fn sign_in(credentials: web::Json<SignInRequest>, data: web::Data<AppState>) -> impl Responder {
     // Get MongoDB connection string from environment
     let mongodb_uri = match env::var("MONGODB_URI") {
