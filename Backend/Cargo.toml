@@ -1,0 +1,8 @@
+[package]
+name = "Backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ask_gemini = "0.1.4"
+tokio = "1.45.0"
