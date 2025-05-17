@@ -4,12 +4,8 @@ import Rectangular from './components/rectanglenode.vue';
 import LineConnector from './components/LineConnector.vue';
 import allancolumn1 from './components/allancolumn1.vue';
 
-
-const nodes = reactive([
-  { id: 1, x: 320, y: 100, text: "Step 1" },
-  { id: 2, x: 320, y: 250, text: "Step 2" },
-  { id: 3, x: 320, y: 400, text: "Step 3" }
-]);
+//  Schema: { id: #, x: 320, y: 400, text: "Step 3", connected: [1,2,4,5], information: "THIS IS THE 3RD OF A NODE"}
+const nodes = reactive([]);
 
 
 const dragging = ref(null);
@@ -70,11 +66,6 @@ function onMouseUp() {
     />
   </div>
 </template>
-
-
-
-
-
 
 <style scoped>
 .main-content {
