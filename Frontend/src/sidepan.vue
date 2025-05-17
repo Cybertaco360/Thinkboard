@@ -59,19 +59,32 @@ const signupError = ref('');
 
 
 async function handleSignup() {
-  if (signupPassword.value !== signupPassword2.value) {
-    signupError.value = "Passwords do not match!";
-    return;
-  }
-  signupError.value = "";
   const data = {
-    id: generateId(),
     name: signupName.value,
     email: signupEmail.value,
-    password: signupPassword.value
+    password: signupPassword.value,
+    password2: signupPassword2.value
   };
-  downloadJSON(data, 'signup-info.json');
-  emit('close');
+
+  // Send signup data to backend
+  const response = await fetch('http://localhost:8080/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
+      // Optionally, log the user in or show a success message
+      alert('Signup successful! Please log in.');
+      emit('close');
+    } else {
+      signupError.value = result.message || 'Signup failed.';
+    }
+  } else {
+    signupError.value = 'Network error: ' + response.statusText;
+  }
 }
 
 function downloadJSON(data, filename) {
@@ -140,6 +153,7 @@ async function handleLogin() {
   z-index: 100;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
+  padding: 50px;
 }
 
 .close-btn {
