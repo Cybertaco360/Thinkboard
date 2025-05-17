@@ -2,7 +2,7 @@
   <div class="center-container">
     <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="rectangles-container">
-      <div class="rounded-rectangle">
+      <div class="rounded-rectangle" @click="$emit('open-signup')">
         <div class="bottom-label">Sign Up</div>
       </div>
       <div class="rounded-rectangle" @click="$emit('open-sidepan')">
@@ -14,13 +14,14 @@
 
 <style scoped>
 .center-container {
-  min-height: 100vh;
+  max-height: 100vh;
   width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  padding-left:30px;
   z-index: 1;
 }
 

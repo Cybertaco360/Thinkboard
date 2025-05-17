@@ -2,17 +2,37 @@
   <transition name="slide">
     <div v-if="visible" class="side-panel">
       <button class="close-btn" @click="emit('close')" aria-label="Close">&times;</button>
-      <h2 class="panel-title">Log In</h2>
-      <form @submit.prevent="handleSubmit">
+      <h2 class="panel-title">{{ type === 'signup' ? 'Sign Up' : 'Log In' }}</h2>
+      <form v-if="type === 'login'" @submit.prevent="handleLogin">
         <label>
           Email
-          <input type="email" v-model="email" required />
+          <input type="email" v-model="loginEmail" required />
         </label>
         <label>
           Password
-          <input type="password" v-model="password" required />
+          <input type="password" v-model="loginPassword" required />
         </label>
         <button class="confirm-btn" type="submit">Confirm</button>
+      </form>
+      <form v-else @submit.prevent="handleSignup">
+        <label>
+          Full Name
+          <input type="text" v-model="signupName" required />
+        </label>
+        <label>
+          Email
+          <input type="email" v-model="signupEmail" required />
+        </label>
+        <label>
+          Password
+          <input type="password" v-model="signupPassword" required />
+        </label>
+        <label>
+          Confirm Password
+          <input type="password" v-model="signupPassword2" required />
+        </label>
+        <button class="confirm-btn" type="submit">Sign Up</button>
+        <div v-if="signupError" class="error-msg">{{ signupError }}</div>
       </form>
     </div>
   </transition>
@@ -20,33 +40,102 @@
 
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
-const props = defineProps({ visible: Boolean });
+import { useUserStore } from '@/stores/userStore';
+const userStore = useUserStore();
+const props = defineProps({ visible: Boolean, type: String });
 const emit = defineEmits(['close']);
 
-const email = ref('');
-const password = ref('');
+// Log In
+const loginEmail = ref('');
+const loginPassword = ref('');
 
-function handleSubmit() {
-  // Create a JSON object with the form data
+// Sign Up
+const signupName = ref('');
+const signupEmail = ref('');
+const signupPassword = ref('');
+const signupPassword2 = ref('');
+const signupError = ref('');
+
+
+
+async function handleSignup() {
   const data = {
-    email: email.value,
-    password: password.value
+    name: signupName.value,
+    email: signupEmail.value,
+    password: signupPassword.value,
+    password2: signupPassword2.value
   };
 
-  // Convert to JSON string
-  const json = JSON.stringify(data, null, 2);
+  // Send signup data to backend
+  const response = await fetch('http://localhost:8080/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
 
-  // Create a blob and trigger download
+  if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
+      // Optionally, log the user in or show a success message
+      alert('Signup successful! Please log in.');
+      emit('close');
+    } else {
+      signupError.value = result.message || 'Signup failed.';
+    }
+  } else {
+    signupError.value = 'Network error: ' + response.statusText;
+  }
+}
+
+function downloadJSON(data, filename) {
+  const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'login-info.json';
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
 
-  emit('close');
+function generateId() {
+  // Simple random ID (8 chars)
+  return Math.random().toString(36).substring(2, 10);
+}
+function handleLoginSuccess(userData) {
+  //userData: {username, email}
+  useUserStore.login(userData)
+  // emit login-success or navigate as needed
+}
+
+
+async function handleLogin() {
+  const data = {
+    email: loginEmail.value,
+    password: loginPassword.value
+  };
+  const response = await fetch('http://localhost:8080/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
+      // Store user info in Pinia
+      userStore.login({
+        username: result.username, // or result.name if that's what your backend returns
+        email: result.email
+      });
+      emit('login-success');
+      emit('close');
+    } else {
+      alert('Login failed: ' + result.message);
+    }
+  } else {
+    alert('Network error: ' + response.statusText);
+  }
 }
 </script>
 
@@ -56,15 +145,15 @@ function handleSubmit() {
   top: 0;
   right: 0;
   width: 340px;
-  height: 100vh;
+  height: 100%;
   background: #80A4F9;
   box-shadow: -2px 0 24px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  padding: 36px 32px;
   z-index: 100;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
+  padding: 50px;
 }
 
 .close-btn {
@@ -135,6 +224,16 @@ input:focus {
 
 .confirm-btn:hover {
   background: #29304d;
+}
+
+.error-msg {
+  color: #ffd6d6;
+  background: #b33a3a;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 1em;
 }
 
 /* Slide transition */

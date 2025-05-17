@@ -1,7 +1,7 @@
 <template>
   <div class="left-column">
     <div class="logo-container">
-      <img src="./assets/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
+      <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     </div>
 
     <div class="ai-assistant">
