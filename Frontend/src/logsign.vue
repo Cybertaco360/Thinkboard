@@ -1,6 +1,6 @@
 <template>
+  <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
   <div class="center-container">
-    <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="rectangles-container">
       <div class="rounded-rectangle" @click="$emit('open-signup')">
         <div class="bottom-label">Log In</div>
@@ -27,9 +27,11 @@
 
 .logo {
   width: 500px;
-  display: block;
-  object-fit: contain;
-  margin-bottom: 40px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  z-index: 2;
 }
 
 .rectangles-container {
