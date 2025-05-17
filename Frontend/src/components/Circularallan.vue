@@ -15,21 +15,21 @@ onMounted(() => {
   const dpr = window.devicePixelRatio || 1;
   const pi = Math.PI;
   const points = 12;
-  const h = 120;
-  const w = 120;
-  const radius = 55;
+  const h = 240;      // Increased from 200
+  const w = 240;      // Increased from 200
+  const radius = 100; // Increased from 80
   const center = {
     x: w / 2,
     y: h / 2
   };
   const circles = [];
-  const rangeMin = 1;
-  const rangeMax = 8;
+  const rangeMin = 6;
+  const rangeMax = 10;
   const showPoints = false;
   let tick = 0;
   let animationId;
 
-  // Blue pastel gradients
+  // Distinct blue gradients (not matching #BACFFD)
   const gradient1 = ctx.createLinearGradient(0, 0, w, 0);
   gradient1.addColorStop(0, '#A7C7E7');
   gradient1.addColorStop(1, '#B4D8F8');
@@ -52,7 +52,7 @@ onMounted(() => {
   el.height = h * dpr;
   el.style.width = w + 'px';
   el.style.height = h + 'px';
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 
   // Setup swing circle points
@@ -88,7 +88,7 @@ onMounted(() => {
 
       for (let i = 0; i < swingpoints.length; i++) {
         swingpoints[i].phase += (Math.random() * 9 + 1) * -0.01;
-        let phase = 2 * Math.sin(tick / 65);
+        let phase = 3.6 * Math.sin(tick / 150); // smaller waves
         const r = radius + (swingpoints[i].range * phase * Math.sin(swingpoints[i].phase)) - rangeMax / 2;
         swingpoints[i].radian += pi / 360;
         const ptX = center.x + r * Math.cos(swingpoints[i].radian);
@@ -149,7 +149,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
+  height: 260px; /* slightly larger than canvas for padding */
   width: 100%;
 }
 canvas {

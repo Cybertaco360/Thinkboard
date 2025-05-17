@@ -1,20 +1,18 @@
 <template>
   <div class="left-column">
     <div class="logo-container">
-      <h1 class="logo">Thinkboard</h1>
+      <img src="./assets/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     </div>
 
     <div class="ai-assistant">
-      <Circularallan />
-      <div class="ai-text">AI Assistant</div>
+      <Circularallan/>
+
     </div>
 
     <div class="nav-container">
       <!-- Navigation content can go here -->
     </div>
-    <div class="footer-container">
-      <p class="version">Thinkboard v1.0</p>
-    </div>
+
   </div>
 </template>
 
@@ -29,7 +27,7 @@ import Circularallan from './Circularallan.vue';
   left: 0;
   width: 400px;
   height: 100vh;
-  background-color: #BACFFD; /* Change this color as you like */
+  background-color: #D4E1FE; /* Change this color as you like */
   border-top-right-radius: 32px;
   border-bottom-right-radius: 32px;
   box-shadow: 2px 0 12px rgba(0,0,0,0.08);
@@ -44,11 +42,10 @@ import Circularallan from './Circularallan.vue';
 }
 
 .logo {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  color: #fff;
-  letter-spacing: 1px;
+  width: 170px;
+  display:block;
+  object-fit: contain;
+  margin: 10px; 
 }
 
 .nav-container {
