@@ -1,6 +1,5 @@
 <template>
-  <div class="rectangle">
-    <!-- Add content here if needed -->
+  <div class="canvas-wrapper">
     <canvas ref="canvasRef"></canvas>
   </div>
 </template>
@@ -16,36 +15,36 @@ onMounted(() => {
   const dpr = window.devicePixelRatio || 1;
   const pi = Math.PI;
   const points = 12;
-  const h = 300;
-  const w = 300;
-  const radius = 140;
+  const h = 240;      // Increased from 200
+  const w = 240;      // Increased from 200
+  const radius = 100; // Increased from 80
   const center = {
     x: w / 2,
     y: h / 2
   };
   const circles = [];
-  const rangeMin = 8;   // Bigger minimum for more pronounced waves
-  const rangeMax = 22;  // Bigger maximum for more pronounced waves
+  const rangeMin = 6;
+  const rangeMax = 10;
   const showPoints = false;
   let tick = 0;
   let animationId;
 
   // Distinct blue gradients (not matching #BACFFD)
   const gradient1 = ctx.createLinearGradient(0, 0, w, 0);
-  gradient1.addColorStop(0, '#1A2980'); // deep blue
-  gradient1.addColorStop(1, '#26D0CE'); // teal blue
+  gradient1.addColorStop(0, '#A7C7E7');
+  gradient1.addColorStop(1, '#B4D8F8');
 
   const gradient2 = ctx.createLinearGradient(0, 0, w, 0);
-  gradient2.addColorStop(0, '#134E5E'); // dark blue
-  gradient2.addColorStop(1, '#71B280'); // blue-green
+  gradient2.addColorStop(0, '#7FB3FF');
+  gradient2.addColorStop(1, '#D6E6FF');
 
   const gradient3 = ctx.createLinearGradient(0, 0, w, 0);
-  gradient3.addColorStop(0, '#0F2027'); // very dark blue
-  gradient3.addColorStop(1, '#2C5364'); // steel blue
+  gradient3.addColorStop(0, '#9AB8FF');
+  gradient3.addColorStop(1, '#E3F0FF');
 
   const gradient4 = ctx.createLinearGradient(0, 0, w, 0);
-  gradient4.addColorStop(0, '#396afc'); // vivid blue
-  gradient4.addColorStop(1, '#2948ff'); // electric blue
+  gradient4.addColorStop(0, '#6C8CD5');
+  gradient4.addColorStop(1, '#B8CFFF');
 
   const gradients = [gradient1, gradient2, gradient3, gradient4];
 
@@ -53,7 +52,7 @@ onMounted(() => {
   el.height = h * dpr;
   el.style.width = w + 'px';
   el.style.height = h + 'px';
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 
   // Setup swing circle points
@@ -89,7 +88,7 @@ onMounted(() => {
 
       for (let i = 0; i < swingpoints.length; i++) {
         swingpoints[i].phase += (Math.random() * 9 + 1) * -0.01;
-        let phase = 6 * Math.sin(tick / 50); // Even bigger and faster waves
+        let phase = 3.6 * Math.sin(tick / 150); // smaller waves
         const r = radius + (swingpoints[i].range * phase * Math.sin(swingpoints[i].phase)) - rangeMax / 2;
         swingpoints[i].radian += pi / 360;
         const ptX = center.x + r * Math.cos(swingpoints[i].radian);
@@ -146,22 +145,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.rectangle {
-  width: 270px;
-  height: 100px;
-  background-color: #D4E1FE; /* Dark blue */
-  border-radius: 20px; /* Rounded corners */
+.canvas-wrapper {
   display: flex;
-  align-items: center;   /* Vertical centering */
-  justify-content: center; /* Horizontal centering */
-  margin: 10%;
-  /* Remove padding if you want pure centering, or adjust as needed */
+  justify-content: center;
+  align-items: center;
+  height: 260px; /* slightly larger than canvas for padding */
+  width: 100%;
 }
 canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  display: block;
+  border-radius: 50%;
+  background: transparent;
 }
 </style>

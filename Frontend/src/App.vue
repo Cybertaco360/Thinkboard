@@ -1,11 +1,17 @@
 <script setup>
 import { ref } from 'vue';
 import Cloud from './cloud.vue';
-import LogSign from './logsign.vue';
+import rectangle from "./components/rectanglenode.vue";
+import allancolumn1 from "./components/allancolumn1.vue";
+
+
+
+
 import SidePan from './sidepan.vue';
 
 const showSidePan = ref(false);
 </script>
+
 
 <template>
   <div style="position:relative; min-height:100vh; width:100vw; overflow:hidden;">
@@ -16,6 +22,8 @@ const showSidePan = ref(false);
     <SidePan :visible="showSidePan" @close="showSidePan = false" />
   </div>
 </template>
+
+
 
 <style scoped>
 .main-content {
