@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue';
-import Rectangular from './components/rectangular.vue';
+import Rectangular from './components/rectanglenode.vue';
 import LineConnector from './components/LineConnector.vue';
 import allancolumn1 from './components/allancolumn1.vue';
 
