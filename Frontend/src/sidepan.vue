@@ -117,12 +117,11 @@ function generateId() {
   top: 0;
   right: 0;
   width: 340px;
-  height: 100vh;
+  height: 100%;
   background: #80A4F9;
   box-shadow: -2px 0 24px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  padding: 36px 32px;
   z-index: 100;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
