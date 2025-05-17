@@ -24,7 +24,7 @@ async function GeminiBackendQuery() {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ text: inputText.value })
+    body: JSON.stringify({ "prompt": inputText.value })
   });
 
   if (response.ok) {
@@ -51,8 +51,8 @@ async function GeminiBackendQuery() {
 }
 
 .text-input {
-  width: 100%;
-  padding-right: 40px; /* Make room for the button */
+  width: 90%;
+  padding-right: 25px; /* Make room for the button */
   padding-left: 16px;
   padding-top:8px;
   padding-bottom: 8px;
