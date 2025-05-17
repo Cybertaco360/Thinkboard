@@ -1,16 +1,20 @@
 <template>
-  <div class="rectangle">
+  <div class="input-container">
     <input
       v-model="inputText"
       class="text-input"
       type="text"
       placeholder="let's create!"
     />
+    <button class="send-button" @click="GeminiBackendQuery">
+      <Send size="20" />
+    </button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { Send } from 'lucide-vue-next';
 
 const inputText = ref('');
 
@@ -48,15 +52,41 @@ async function GeminiBackendQuery() {
 
 .text-input {
   width: 90%;
-  padding-right: 12px;
-  padding-left: 12px;
+  padding-right: 16px;
+  padding-left: 16px;
   padding-top:8px;
   padding-bottom: 8px;
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   font-size: 1.1rem;
   outline: none;
   background: #f5f7fa;
   color: #222;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f7fa;
+  padding: 4px;
+  border-radius: 20px;
+}
+
+.send-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.send-button:hover {
+  background-color: #e0e0e0;
 }
 </style>
