@@ -13,6 +13,24 @@
 import { ref } from 'vue';
 
 const inputText = ref('');
+
+async function GeminiBackendQuery() {
+  const response = await fetch('http://localhost:8080/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ text: inputText.value })
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    console.log(data);
+  } else {
+    console.error('Error:', response.statusText);
+  }
+}
+
 </script>
 
 <style scoped>
