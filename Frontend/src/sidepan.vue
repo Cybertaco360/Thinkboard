@@ -70,14 +70,19 @@ async function handleLogin() {
   if (response.ok) {
     const result = await response.json();
     if (result.success) {
-      alert('Login successful!');
+      // Store user info in Pinia
+      userStore.login({
+        username: result.username, // or result.name if that's what your backend returns
+        email: result.email
+      });
+      emit('login-success');
+      emit('close');
     } else {
       alert('Login failed: ' + result.message);
     }
   } else {
     alert('Network error: ' + response.statusText);
   }
-  emit('close');
 }
 
 async function handleSignup() {
@@ -117,16 +122,7 @@ function handleLoginSuccess(userData) {
   // emit login-success or navigate as needed
 }
 
-async function handleLogin() {
-  const response = await loginApiCall()
-  if (response.success) {
-    userStore.login({
-      username: response.username,
-      email: response.email,
-      
-    })
-    emit('login-success')
-  }
+
 }
 </script>
 
