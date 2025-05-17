@@ -6,18 +6,21 @@
 
     <div class="ai-assistant">
       <Circularallan/>
-
     </div>
 
     <div class="nav-container">
       <!-- Navigation content can go here -->
     </div>
 
+    <div class="input-bottom">
+      <Textinputallan />
+    </div>
   </div>
 </template>
 
 <script setup>
 import Circularallan from './Circularallan.vue';
+import Textinputallan from './textinputallan.vue';
 </script>
 
 <style scoped>
@@ -54,54 +57,12 @@ import Circularallan from './Circularallan.vue';
   overflow-y: auto;
 }
 
-.nav-items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.nav-item {
-  margin-bottom: 8px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  color: rgba(255,255,255,0.8);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
-
-.nav-link:hover {
-  background-color: rgba(255,255,255,0.1);
-  color: white;
-  border-left: 3px solid #3498db;
-}
-
-.icon {
-  margin-right: 12px;
-  font-size: 18px;
-  width: 24px;
+/* Add this to anchor the input at the bottom */
+.input-bottom {
+  padding: 24px 20px;
+  margin-top: auto;
   display: flex;
   justify-content: center;
-}
-
-.label {
-  font-size: 15px;
-}
-
-.footer-container {
-  padding: 16px 20px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-  text-align: center;
-}
-
-.version {
-  margin: 0;
 }
 
 .ai-assistant {
