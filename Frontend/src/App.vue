@@ -3,13 +3,10 @@ import { ref } from 'vue';
 import Cloud from './cloud.vue';
 import rectangle from "./components/rectanglenode.vue";
 import allancolumn1 from "./components/allancolumn1.vue";
-
-
-
-
 import SidePan from './sidepan.vue';
-
+import LogSign from './logsign.vue';
 const showSidePan = ref(false);
+const signin = ref(false);
 </script>
 
 

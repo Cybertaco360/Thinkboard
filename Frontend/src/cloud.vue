@@ -22,10 +22,11 @@
   pointer-events: none;
   z-index: 0;
   animation: cloudstart 0s linear;
+
 }
 .cloud {
   position: relative;
-  background: url('./assets/cloud.png') no-repeat center/contain;
+  background: url('/public/cloud.png') no-repeat center/contain;
   background-size: contain;
   opacity: 0.8;
   pointer-events: none;

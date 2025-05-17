@@ -1,7 +1,8 @@
 <template>
   <transition name="slide">
     <div v-if="visible" class="side-panel">
-      <h2 class="panel-title">Sign In</h2>
+      <button class="close-btn" @click="emit('close')" aria-label="Close">&times;</button>
+      <h2 class="panel-title">Log In</h2>
       <form @submit.prevent="handleSubmit">
         <label>
           Email
@@ -26,8 +27,26 @@ const email = ref('');
 const password = ref('');
 
 function handleSubmit() {
+  // Create a JSON object with the form data
+  const data = {
+    email: email.value,
+    password: password.value
+  };
+
+  // Convert to JSON string
+  const json = JSON.stringify(data, null, 2);
+
+  // Create a blob and trigger download
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'login-info.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
   emit('close');
-  // handle form data here if needed
 }
 </script>
 
@@ -46,6 +65,22 @@ function handleSubmit() {
   z-index: 100;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #888;
+  cursor: pointer;
+  z-index: 101;
+  transition: color 0.2s;
+}
+.close-btn:hover {
+  color: #222;
 }
 
 .panel-title {

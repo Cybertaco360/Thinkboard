@@ -1,6 +1,6 @@
 <template>
   <div class="center-container">
-    <img src="./assets/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
+    <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="rectangles-container">
       <div class="rounded-rectangle">
         <div class="bottom-label">Sign Up</div>
