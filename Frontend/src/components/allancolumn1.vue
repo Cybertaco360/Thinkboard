@@ -1,9 +1,6 @@
 <template>
   <div class="left-column">
-    <div class="logo-container">
-      <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
-    </div>
-
+    <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="ai-assistant">
       <Circularallan/>
     </div>
@@ -24,31 +21,26 @@ import Textinputallan from './textinputallan.vue';
 </script>
 
 <style scoped>
+.logo {
+  position: relative;  /* changed from absolute */
+  width: 170px;
+  margin: 10px 0 0 10px;  /* add margin instead of absolute positioning */
+  z-index: 101;
+}
+
 .left-column {
   position: fixed;
   top: 0;
   left: 0;
   width: 400px;
   height: 100vh;
-  background-color: #D4E1FE; /* Change this color as you like */
+  background-color: #D4E1FE;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 32px;
   box-shadow: 2px 0 12px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   z-index: 100;
-}
-
-.logo-container {
-  padding: 24px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.logo {
-  width: 170px;
-  display:block;
-  object-fit: contain;
-  margin: 10px; 
 }
 
 .nav-container {
@@ -70,7 +62,7 @@ import Textinputallan from './textinputallan.vue';
   flex-direction: column;
   align-items: center;
   padding: 24px 0;
-  margin-top: 10px;
+  margin-top: 0;  /* reduce space between logo and assistant */
 }
 
 .ai-circle {

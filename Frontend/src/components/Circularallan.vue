@@ -149,8 +149,9 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 260px; /* slightly larger than canvas for padding */
+  height: 260px;
   width: 100%;
+  margin-top: 40px;  /* Added margin-top to move it down */
 }
 canvas {
   display: block;
