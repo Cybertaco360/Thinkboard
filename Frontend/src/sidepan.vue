@@ -56,34 +56,7 @@ const signupPassword = ref('');
 const signupPassword2 = ref('');
 const signupError = ref('');
 
-async function handleLogin() {
-  const data = {
-    email: loginEmail.value,
-    password: loginPassword.value
-  };
-  const response = await fetch('http://localhost:8080/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
 
-  if (response.ok) {
-    const result = await response.json();
-    if (result.success) {
-      // Store user info in Pinia
-      userStore.login({
-        username: result.username, // or result.name if that's what your backend returns
-        email: result.email
-      });
-      emit('login-success');
-      emit('close');
-    } else {
-      alert('Login failed: ' + result.message);
-    }
-  } else {
-    alert('Network error: ' + response.statusText);
-  }
-}
 
 async function handleSignup() {
   if (signupPassword.value !== signupPassword2.value) {
@@ -123,6 +96,33 @@ function handleLoginSuccess(userData) {
 }
 
 
+async function handleLogin() {
+  const data = {
+    email: loginEmail.value,
+    password: loginPassword.value
+  };
+  const response = await fetch('http://localhost:8080/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
+      // Store user info in Pinia
+      userStore.login({
+        username: result.username, // or result.name if that's what your backend returns
+        email: result.email
+      });
+      emit('login-success');
+      emit('close');
+    } else {
+      alert('Login failed: ' + result.message);
+    }
+  } else {
+    alert('Network error: ' + response.statusText);
+  }
 }
 </script>
 
