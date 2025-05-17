@@ -11,7 +11,8 @@ use std::env;
 use std::sync::Arc;
 use std::path::Path;
 use std::fs;
-
+use mongodb::bson::doc;
+use mongodb::bson::DateTime;
 #[derive(Deserialize)]
 struct Config {
     prompt: String,
@@ -36,6 +37,13 @@ struct SignInResponse {
 }
 
 #[derive(Deserialize)]
+struct SignUpRequest {
+    name: String,
+    email: String,
+    password: String,
+}
+
+#[derive(Serialize, Deserialize)]
 struct UserInfo {
     id: String,
     name: String,
@@ -69,6 +77,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         Err(_) => return Err("GEMINI_API_KEY environment variable not set. Please create a .env file with your API key".into()),
     };
+
+    let database_key = match env::var("MONGODB_URI") {
+        Ok(key) => {
+            if key.is_empty() {
+                return Err("MONGODB_URI environment variable is empty".into());
+            }
+            key
+        },
+        Err(_) => return Err("MONGODB_URI environment variable not set. Please create a .env file with your API key".into()),
+    };
     
     println!("API key loaded successfully");
     let client = Arc::new(Gemini::new(&api_key));
@@ -84,10 +102,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .service(hello)
             .service(generate_content)
             .service(sign_in)
+            .service(sign_up)
     })
     .bind("127.0.0.1:8080")?
     .run()
-    .await;
+    .await?;
     
     Ok(())
 }
@@ -119,59 +138,170 @@ async fn generate_content(config: web::Json<Config>, data: web::Data<AppState>) 
             }
         }
 }
-
 #[post("/signin")]
-async fn sign_in(credentials: web::Json<SignInRequest>) -> impl Responder {
-    // Define the users directory path
-    let users_dir = Path::new("users");
+async fn sign_in(credentials: web::Json<SignInRequest>, data: web::Data<AppState>) -> impl Responder {
+    // Get MongoDB connection string from environment
+    let mongodb_uri = match env::var("MONGODB_URI") {
+        Ok(uri) => uri,
+        Err(_) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: "Database configuration error".to_string(),
+                user_id: None,
+            });
+        }
+    };
+
+    // Connect to MongoDB
+    let client_options = match mongodb::options::ClientOptions::parse(&mongodb_uri).await {
+        Ok(opts) => opts,
+        Err(e) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: format!("Failed to parse MongoDB connection string: {}", e),
+                user_id: None,
+            });
+        }
+    };
+
+    let client = match mongodb::Client::with_options(client_options) {
+        Ok(client) => client,
+        Err(e) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: format!("Failed to connect to MongoDB: {}", e),
+                user_id: None,
+            });
+        }
+    };
+
+    // Access database and collection
+    let database = client.database("jamhacks");
+    let users_collection = database.collection::<UserInfo>("users");
+
+    // Find user by email
+    let filter = doc!{ "email": &credentials.email };
     
-    // Check if the directory exists
-    if !users_dir.exists() {
-        return web::Json(SignInResponse {
-            success: false,
-            message: "Users database not found".to_string(),
-            user_id: None,
-        });
-    }
-    
-    // Iterate through user directories
-    for entry in fs::read_dir(users_dir).unwrap() {
-        if let Ok(entry) = entry {
-            let user_info_path = entry.path().join("user_info.json");
-            
-            // Check if user_info.json exists
-            if user_info_path.exists() {
-                // Read and parse user_info.json
-                if let Ok(file_content) = fs::read_to_string(user_info_path) {
-                    if let Ok(user_info) = serde_json::from_str::<UserInfo>(&file_content) {
-                        // Check if email matches
-                        if user_info.email == credentials.email {
-                            // Check password (in a real system, you'd use password hashing)
-                            if user_info.password == credentials.password {
-                                return web::Json(SignInResponse {
-                                    success: true,
-                                    message: "Authentication successful".to_string(),
-                                    user_id: Some(user_info.id),
-                                });
-                            } else {
-                                return web::Json(SignInResponse {
-                                    success: false,
-                                    message: "Incorrect password".to_string(),
-                                    user_id: None,
-                                });
-                            }
-                        }
-                    }
-                }
+    match users_collection.find_one(filter).await {
+        Ok(Some(user)) => {
+            // Check password (in a real system, you'd use password hashing)
+            if user.password == credentials.password {
+                web::Json(SignInResponse {
+                    success: true,
+                    message: "Authentication successful".to_string(),
+                    user_id: Some(user.id),
+                })
+            } else {
+                web::Json(SignInResponse {
+                    success: false,
+                    message: "Incorrect password".to_string(),
+                    user_id: None,
+                })
             }
+        },
+        Ok(None) => {
+            web::Json(SignInResponse {
+                success: false,
+                message: "User not found".to_string(),
+                user_id: None,
+            })
+        },
+        Err(e) => {
+            web::Json(SignInResponse {
+                success: false,
+                message: format!("Database error: {}", e),
+                user_id: None,
+            })
         }
     }
-    
-    // If no matching email was found
-    web::Json(SignInResponse {
-        success: false,
-        message: "User not found".to_string(),
-        user_id: None,
-    })
+}
+
+#[post("/signup")]
+async fn sign_up(credentials: web::Json<SignUpRequest>) -> impl Responder {
+    use chrono::Utc;
+
+    // Get MongoDB connection string from environment
+    let mongodb_uri = match env::var("MONGODB_URI") {
+        Ok(uri) => uri,
+        Err(_) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: "Database configuration error".to_string(),
+                user_id: None,
+            });
+        }
+    };
+
+    // Connect to MongoDB
+    let client_options = match mongodb::options::ClientOptions::parse(&mongodb_uri).await {
+        Ok(opts) => opts,
+        Err(e) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: format!("Failed to parse MongoDB connection string: {}", e),
+                user_id: None,
+            });
+        }
+    };
+
+    let client = match mongodb::Client::with_options(client_options) {
+        Ok(client) => client,
+        Err(e) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: format!("Failed to connect to MongoDB: {}", e),
+                user_id: None,
+            });
+        }
+    };
+
+    let database = client.database("jamhacks");
+    let users_collection = database.collection::<UserInfo>("users");
+
+    // Check if user already exists
+    let filter = doc! { "email": &credentials.email };
+    match users_collection.find_one(filter.clone()).await {
+        Ok(Some(_)) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: "User already exists".to_string(),
+                user_id: None,
+            });
+        }
+        Err(e) => {
+            return web::Json(SignInResponse {
+                success: false,
+                message: format!("Database error: {}", e),
+                user_id: None,
+            });
+        }
+        _ => {}
+    }
+
+    // Create new user
+    let user_idexit
+     = uuid::Uuid::new_v4().to_string();
+    let now = Utc::now().to_rfc3339();
+    let new_user = UserInfo {
+        id: user_id.clone(),
+        name: credentials.name.clone(),
+        email: credentials.email.clone(),
+        created_at: now.clone(),
+        last_login: now,
+        password: credentials.password.clone(), // In production, hash this!
+    };
+
+    match users_collection.insert_one(&new_user).await {
+        Ok(_) => web::Json(SignInResponse {
+            success: true,
+            message: "User registered successfully".to_string(),
+            user_id: Some(user_id),
+        }),
+        Err(e) => web::Json(SignInResponse {
+            success: false,
+            message: format!("Failed to register user: {}", e),
+            user_id: None,
+        }),
+    }
 }
 
