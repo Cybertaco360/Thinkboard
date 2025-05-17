@@ -40,6 +40,8 @@
 
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
+import { useUserStore } from '@/stores/userStore';
+const userStore = useUserStore();
 const props = defineProps({ visible: Boolean, type: String });
 const emit = defineEmits(['close']);
 
@@ -108,6 +110,23 @@ function downloadJSON(data, filename) {
 function generateId() {
   // Simple random ID (8 chars)
   return Math.random().toString(36).substring(2, 10);
+}
+function handleLoginSuccess(userData) {
+  //userData: {username, email}
+  useUserStore.login(userData)
+  // emit login-success or navigate as needed
+}
+
+async function handleLogin() {
+  const response = await loginApiCall()
+  if (response.success) {
+    userStore.login({
+      username: response.username,
+      email: response.email,
+      
+    })
+    emit('login-success')
+  }
 }
 </script>
 

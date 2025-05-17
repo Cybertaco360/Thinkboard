@@ -14,13 +14,14 @@
 
 <style scoped>
 .center-container {
-  max-height: 1000vh;
+  max-height: 100vh;
   width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  padding-left:30px;
   z-index: 1;
 }
 
