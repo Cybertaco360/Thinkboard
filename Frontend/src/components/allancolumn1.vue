@@ -146,7 +146,7 @@ Learning Style: ${answers.style}`;
   background-color: #D4E1FE;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 32px;
-  box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.07); 
   display: flex;
   flex-direction: column;
   z-index: 100;
