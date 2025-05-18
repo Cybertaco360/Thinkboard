@@ -13,7 +13,6 @@ import ActionBar from './components/ActionBar.vue';
 import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp.vue';
 import nodeService from './services/node.service';
 import { login, signup } from './services/api.service';
-
 // UI state
 const showSidePan = ref(false);
 const type = ref('signup');
@@ -41,18 +40,6 @@ const drawingLineTarget = ref({ x: 0, y: 0 });
 const viewportWidth = ref(0);
 const viewportHeight = ref(0);
 
-// Computed viewport for MiniMap
-const miniMapViewport = computed(() => ({
-  width: 74 * viewportWidth.value / 100,
-  height: 99 * viewportHeight.value / 100
-}));
-
-// Update viewport dimensions
-const updateViewportDimensions = () => {
-  viewportWidth.value = window.innerWidth;
-  viewportHeight.value = window.innerHeight;
-};
-
 // Current node categories with colors
 const nodeCategories = reactive([
   { id: 1, name: 'Task', color: '#4CAF50' },
@@ -60,6 +47,9 @@ const nodeCategories = reactive([
   { id: 3, name: 'Decision', color: '#FF9800' },
   { id: 4, name: 'Note', color: '#9C27B0' },
 ]);
+
+// Access nodes from service
+const nodes = nodeService.nodes;
 
 // Access nodes from service
 const nodes = nodeService.nodes;
