@@ -15,55 +15,18 @@
 
 <script setup>
 import { ref, defineEmits } from 'vue';
-import { Send } from 'lucide-vue-next'; // Let's try the simpler Send icon first
+import { Send } from 'lucide-vue-next';
 
-const emit = defineEmits(['nodes-update']);
+const emit = defineEmits(['submit']);
 const inputText = ref('');
 
-function validateNodeSchema(data) {
-  // Handle both array and single object responses
-  const nodeArray = Array.isArray(data) ? data : [data];
-  
-  return nodeArray.map((node, index) => ({
-    node_id: node.node_id || index,
-    x: node.x || 100,
-    y: node.y || (100 + index * 150),
-    text: node.text || 'Unknown',
-    connected: Array.isArray(node.connected) ? node.connected : [],
-    information: node.information || ''
-  }));
-}
-
-async function GeminiBackendQuery() {
-  try {
-    const response = await fetch('http://localhost:8080/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ prompt: inputText.value })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const validatedNodes = validateNodeSchema(data);
-      emit('nodes-update', validatedNodes);
-      console.log('Validated nodes:', validatedNodes);
-    } else {
-      const error = await response.json();
-      console.error('API Error:', error);
-    }
-  } catch (error) {
-    console.error('Error processing response:', error);
-  }
-}
-
 async function handleSubmit() {
-  if (!inputText.value.trim()) return; // Don't submit if empty
-  await GeminiBackendQuery();
-  inputText.value = ''; // Clear the input after submission
+  if (!inputText.value.trim()) return;
+  
+  // Just emit the answer, don't call API
+  emit('submit', inputText.value.trim());
+  inputText.value = ''; // Clear input after submission
 }
-
 </script>
 
 <style scoped>
