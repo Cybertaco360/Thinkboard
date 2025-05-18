@@ -10,7 +10,7 @@
     </div>
 
     <div class="input-bottom">
-      <Textinputallan />
+      <Textinputallan @nodes-update="nodes => $emit('nodes-update', nodes)"/>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
       :node="node"
       :style="{
         position: 'absolute',
-        left: `${node.x}px`,
+        left: `${node.x+350}px`,
         top: `${node.y}px`
       }"
     />
@@ -29,7 +29,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import Circularallan from './Circularallan.vue';
 import Textinputallan from './textinputallan.vue';
 import rectangle from './rectanglenode.vue';

@@ -5,8 +5,9 @@
       class="text-input"
       type="text"
       placeholder="let's create!"
+      @keyup.enter="handleSubmit"
     />
-    <button class="send-button" @click="GeminiBackendQuery">
+    <button class="send-button" @click="handleSubmit">
       <Send size="20" />
     </button>
   </div>
@@ -55,6 +56,12 @@ async function GeminiBackendQuery() {
   } catch (error) {
     console.error('Error processing response:', error);
   }
+}
+
+async function handleSubmit() {
+  if (!inputText.value.trim()) return; // Don't submit if empty
+  await GeminiBackendQuery();
+  inputText.value = ''; // Clear the input after submission
 }
 
 </script>

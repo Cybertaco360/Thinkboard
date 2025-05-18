@@ -133,7 +133,7 @@ async fn generate_content(config: web::Json<Config>, data: web::Data<AppState>) 
     let client = &data.gemini_client;
 
     match client.generate_content()
-        .with_system_prompt(r#"You are a helpful AI assistant. Provide your response as a single JSON array of nodes. Each node must use this schema: { node_id: #, x: X-COORDINATE, y: Y-COORDINATE, text: "TEXT THAT WILL BE DISPLAYED ON THE NODE", connected: [OTHER NODES TO BE CONNECTED TO], information: "Information at this certain point" }. Do not put or return in a codeblock. Make sure that there's no ```json ``` or anything like that. Do not return anything except the JSON array."#)
+        .with_system_prompt(r#"You are a helpful AI assistant. Provide your response as a single JSON array of nodes. Each node must use this schema: { node_id: #, x: X-COORDINATE, y: Y-COORDINATE, text: "TEXT THAT WILL BE DISPLAYED ON THE NODE", connected: [OTHER NODES TO BE CONNECTED TO], information: "Information at this certain point" }. Do not put or return in a codeblock. Make sure that there's no ```json ``` or anything like that. Do not return anything except the JSON array. Each Node has a width of 270px and a height of 100px, the X and Y you are going to be providing is always going to be in the unit PX"#)
         .with_user_message(&config.prompt)
         .execute()
         .await {
