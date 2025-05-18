@@ -6,62 +6,40 @@
       type="text"
       placeholder="let's create!"
       @keyup.enter="handleSubmit"
+      :disabled="isLoading"
     />
-    <button class="send-button" @click="handleSubmit">
-      <Send size="20" />
+    <button class="send-button" @click="handleSubmit" :disabled="isLoading">
+      <span v-if="isLoading" class="loading-spinner"></span>
+      <Send v-else size="20" />
     </button>
   </div>
 </template>
 
 <script setup>
 import { ref, defineEmits } from 'vue';
-import { Send } from 'lucide-vue-next'; // Let's try the simpler Send icon first
+import { Send } from 'lucide-vue-next';
+import { generateNodesFromPrompt } from '../services/api.service';
+import nodeService from '../services/node.service';
 
-const emit = defineEmits(['nodes-update']);
+const emit = defineEmits(['nodes-update', 'error']);
 const inputText = ref('');
-
-function validateNodeSchema(data) {
-  // Handle both array and single object responses
-  const nodeArray = Array.isArray(data) ? data : [data];
-  
-  return nodeArray.map((node, index) => ({
-    node_id: node.node_id || index,
-    x: node.x || 100,
-    y: node.y || (100 + index * 150),
-    text: node.text || 'Unknown',
-    connected: Array.isArray(node.connected) ? node.connected : [],
-    information: node.information || ''
-  }));
-}
-
-async function GeminiBackendQuery() {
-  try {
-    const response = await fetch('http://localhost:8080/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ prompt: inputText.value })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const validatedNodes = validateNodeSchema(data);
-      emit('nodes-update', validatedNodes);
-      console.log('Validated nodes:', validatedNodes);
-    } else {
-      const error = await response.json();
-      console.error('API Error:', error);
-    }
-  } catch (error) {
-    console.error('Error processing response:', error);
-  }
-}
+const isLoading = ref(false);
 
 async function handleSubmit() {
-  if (!inputText.value.trim()) return; // Don't submit if empty
-  await GeminiBackendQuery();
-  inputText.value = ''; // Clear the input after submission
+  if (!inputText.value.trim() || isLoading.value) return;
+  
+  isLoading.value = true;
+  try {
+    const data = await generateNodesFromPrompt(inputText.value);
+    const nodes = nodeService.addNodes(data);
+    emit('nodes-update', nodes);
+    inputText.value = ''; // Clear the input after submission
+  } catch (error) {
+    emit('error', `Failed to generate nodes: ${error.message}`);
+    console.error('Error processing response:', error);
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 </script>
@@ -81,7 +59,7 @@ async function handleSubmit() {
 
 .text-input {
   width: 90%;
-  padding-right: 25px; /* Make room for the button */
+  padding-right: 25px;
   padding-left: 16px;
   padding-top:8px;
   padding-bottom: 8px;
@@ -114,7 +92,26 @@ async function handleSubmit() {
   transition: color 0.2s;
 }
 
-.send-button:hover {
+.send-button:hover:not(:disabled) {
   color: #222;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #666;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
