@@ -127,6 +127,27 @@ function connectNodes(nodeIds) {
 }
 
 /**
+ * Remove connections between nodes
+ */
+function disconnectNodes(nodeIds) {
+  if (nodeIds.length < 2) return;
+  
+  saveState();
+  
+  // Remove connections between all selected nodes
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (nodeIds.includes(node.node_id)) {
+      // Filter out connections to other selected nodes
+      node.connected = node.connected.filter(id => !nodeIds.includes(id));
+    } else {
+      // Also remove connections from non-selected nodes to selected nodes
+      node.connected = node.connected.filter(id => !nodeIds.includes(id));
+    }
+  }
+}
+
+/**
  * Undo last action
  */
 function undo() {
@@ -216,6 +237,7 @@ export default {
   createNode,
   deleteNodes,
   connectNodes,
+  disconnectNodes,  // Add the new method
   undo,
   redo,
   addSampleNodes

@@ -1,13 +1,14 @@
 <template>
   <div class="left-column" :class="{ 'collapsed': isThinking }">
+    <div class="cinematic-overlay" :class="{ 'active': showOverlay }"></div>
     <img src="/public/thinkboard.png" alt="ThinkBoard Logo" class="logo" />
     <div class="ai-assistant">
-      <Circularallan/>
-      <div v-if="!isThinking" class="info-box" :class="{ 'fade-out': fadeAnswer }">
+      <Circularallan :pulse="isTransitioning"/>
+      <div v-if="!isThinking" class="info-box" :class="{ 'fade-out': fadeAnswer, 'dramatic-entry': dramaticEntry }">
         <p class="info-text">{{ questions[currentQuestion] }}</p>
       </div>
       <div v-else class="thinking-box">
-        <p class="thinking-text">Thinking<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+        <p class="thinking-text">Processing your journey<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
       </div>
     </div>
 
@@ -15,28 +16,36 @@
       <!-- Navigation content can go here -->
     </div>
 
-    <div class="input-bottom">
-      <Textinputallan @submit="handleAnswer"/>
+    <div class="input-bottom" :class="{ 'glow': currentQuestion > 0 }">
+      <Textinputallan @submit="handleAnswer" :placeholder="inputPlaceholders[currentQuestion]"/>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import Circularallan from './Circularallan.vue';
 import Textinputallan from './textinputallan.vue';
-import rectangle from './rectanglenode.vue';
 
 defineProps({ nodes: Array });
 const emit = defineEmits(['nodes-update']);
 
 const questions = [
-  "Welcome to ThinkBoard! Your journey will begin in 10 seconds...",
-  "What's your main goal or topic you want to explore?",
-  "Do you have any prior experience with this topic? Please be specific about what you already know.",
-  "How much time can you dedicate to learning this topic? (e.g., hours per week)",
-  "How deep would you like to dive into this topic? (beginner/intermediate/advanced)",
-  "What's your preferred learning style? (practical examples, theoretical concepts, or both?)"
+  "Welcome to ThinkBoard. Your journey into knowledge begins now...",
+  "What quest for knowledge drives you forward? What do you seek to master?",
+  "What foundation have you already built? Tell me of your experience in this realm.",
+  "How much of your precious time can you devote to this pursuit? How many hours will you sacrifice?",
+  "How deep will you venture into this subject? Will you merely scratch the surface, or plunge into its depths?",
+  "How does your mind best absorb wisdom? Through practical application, theoretical understanding, or a blend of both?"
+];
+
+const inputPlaceholders = [
+  "press enter to continue...",
+  "your goal awaits...",
+  "share your experience...",
+  "time is precious...",
+  "how deep will you go?",
+  "how do you learn best?"
 ];
 
 const answers = reactive({
@@ -51,18 +60,47 @@ const currentQuestion = ref(0);
 const fadeAnswer = ref(false);
 const isThinking = ref(false);
 const startTimeout = ref(null);
+const isTransitioning = ref(false);
+const showOverlay = ref(false);
+const dramaticEntry = ref(true);
 
-// Start 10 second countdown on mount
+// Dramatic intro with timed overlay
 onMounted(() => {
-  startTimeout.value = setTimeout(() => {
-    currentQuestion.value++;
-    fadeAnswer.value = false;
-  }, 10000);
+  showOverlay.value = true;
+  setTimeout(() => {
+    showOverlay.value = false;
+    dramaticEntry.value = true;
+    
+    // Start countdown after intro
+    startTimeout.value = setTimeout(() => {
+      transitionToNextQuestion();
+    }, 8000);
+  }, 2000);
 });
 
 onUnmounted(() => {
   if (startTimeout.value) clearTimeout(startTimeout.value);
 });
+
+const transitionToNextQuestion = async () => {
+  dramaticEntry.value = false;
+  fadeAnswer.value = true;
+  isTransitioning.value = true;
+  
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  if (currentQuestion.value < questions.length - 1) {
+    currentQuestion.value++;
+    showOverlay.value = true;
+    
+    setTimeout(() => {
+      showOverlay.value = false;
+      fadeAnswer.value = false;
+      dramaticEntry.value = true;
+      isTransitioning.value = false;
+    }, 500);
+  }
+};
 
 const handleAnswer = async (answer) => {
   // Store answer based on current question
@@ -86,20 +124,23 @@ const handleAnswer = async (answer) => {
       break;
   }
 
-  // Trigger fade effect
-  fadeAnswer.value = true;
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
+  // Dramatic transition between questions
   if (currentQuestion.value < questions.length - 1) {
-    // Move to next question
-    currentQuestion.value++;
-    fadeAnswer.value = false;
+    await transitionToNextQuestion();
   } else {
-    // Show thinking animation
-    isThinking.value = true;
+    // Final dramatic transition to thinking state
+    fadeAnswer.value = true;
+    isTransitioning.value = true;
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Wait 2 seconds before collapsing column
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Dramatic reveal of thinking animation
+    showOverlay.value = true;
+    await new Promise(resolve => setTimeout(resolve, 700));
+    isThinking.value = true;
+    showOverlay.value = false;
+    
+    // Cinematic pause before collapsing
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
     const finalPrompt = `Create a mind map for the following:
 Goal: ${answers.goal}
@@ -109,7 +150,7 @@ Depth: ${answers.depth}
 Learning Style: ${answers.style}`;
     
     try {
-      // Make API call to get nodes instead of just passing the prompt
+      // Make API call to get nodes
       const response = await fetch('http://127.0.0.1:8080/generate', {
         method: 'POST',
         headers: {
@@ -171,26 +212,45 @@ Learning Style: ${answers.style}`;
 
 <style scoped>
 .logo {
-  position: relative;  /* changed from absolute */
+  position: relative;
   width: 170px;
-  margin: 10px 0 0 10px;  /* add margin instead of absolute positioning */
+  margin: 10px 0 0 10px;
   z-index: 101;
+  animation: pulse-glow 3s infinite alternate;
 }
 
 .left-column {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;  /* Changed from 400px to 100vw */
+  width: 100vw;
   height: 100vh;
-  background-color: #D4E1FE;
-  border-top-right-radius: 32px;
-  border-bottom-right-radius: 32px;
-  box-shadow: 2px 0 12px rgba(0,0,0,0.07); 
+  background-color: #1a2035;
+  background-image: radial-gradient(circle at 50% 50%, #2a3b5c, #1a2035);
+  box-shadow: 0 0 30px rgba(50, 130, 255, 0.3);
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width 0.5s ease; /* Add smooth transition */
+  transition: width 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  overflow: hidden;
+}
+
+.cinematic-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: none;
+  background-color: black;
+  opacity: 0;
+  z-index: 150;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.cinematic-overlay.active {
+  opacity: 0.7;
 }
 
 .nav-container {
@@ -199,151 +259,89 @@ Learning Style: ${answers.style}`;
   overflow-y: auto;
 }
 
-/* Add this to anchor the input at the bottom */
 .input-bottom {
   padding: 24px 20px;
   margin-top: auto;
   display: flex;
   justify-content: center;
+  transition: box-shadow 0.5s ease;
+}
+
+.input-bottom.glow {
+  box-shadow: 0 -5px 20px rgba(160, 196, 255, 0.582);
 }
 
 .ai-assistant {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 0;
-  margin-top: 0;  /* reduce space between logo and assistant */
-}
-
-.ai-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(52, 152, 219, 0.2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  border: 2px solid rgba(52, 152, 219, 0.5);
-}
-
-.ai-pulse-container {
-  width: 60%;
-  height: 40%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.ai-pulse {
-  width: 4px;
-  height: 20px;
-  background-color: #3498db;
-  border-radius: 4px;
-  animation: pulse 1.4s ease-in-out infinite;
-}
-
-.ai-pulse:nth-child(1) { animation-delay: -1.2s; }
-.ai-pulse:nth-child(2) { animation-delay: -0.9s; }
-.ai-pulse:nth-child(3) { animation-delay: -0.6s; }
-.ai-pulse:nth-child(4) { animation-delay: -0.3s; }
-.ai-pulse:nth-child(5) { animation-delay: 0s; }
-
-@keyframes pulse {
-  0%, 100% {
-    height: 10px;
-    background-color: rgba(52, 152, 219, 0.6);
-  }
-  50% {
-    height: 30px;
-    background-color: #3498db;
-  }
-}
-
-.ai-text {
-  margin-top: 14px;
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.5px;
-}
-
-.nodes-container {
-  position: fixed;
-  top: 0;
-  left: 100vw; /* Changed from 400px to follow full width */
-  width: 0; /* Initially hidden */
-  height: 100vh;
-  overflow: hidden;
-  pointer-events: none;
-  transition: all 0.3s ease; /* Add smooth transition */
-}
-
-.nodes-container > * {
-  pointer-events: auto;
-}
-
-/* Add these classes for when nodes are present */
-.left-column.with-nodes {
-  width: 400px;
-}
-
-.nodes-container.with-nodes {
-  left: 400px;
-  width: calc(100% - 400px);
+  padding: 40px 0;
+  margin-top: 0;
 }
 
 .info-box {
-  background: white;
-  border-radius: 16px;
-  padding: 15px 20px;
-  margin: 20px;
-  width: 80%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: opacity 0.5s ease;
+  background: rgba(100, 170, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 170, 255, 0.3);
+  padding: 20px 25px;
+  margin: 30px;
+  width: 85%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 20px rgba(50, 130, 255, 0.2);
+  transition: all 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: pulse-glow 3s infinite alternate;
+}
+
+.info-box.dramatic-entry {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .fade-out {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.fade-in {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 0 !important;
+  transform: translateY(-20px) !important;
+  transition: opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1), transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .info-text {
-  color: #4A5568;
-  font-size: 14px;
+  color: #e0f0ff;
+  font-size: 16px;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.6;
   margin: 0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
 }
 
 .thinking-box {
-  background: white;
+  background: rgba(30, 50, 80, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 170, 255, 0.3);
   border-radius: 16px;
-  padding: 15px 20px;
-  margin: 20px;
-  width: 80%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px 25px;
+  margin: 30px;
+  width: 85%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 30px rgba(50, 130, 255, 0.3);
+  animation: pulse-box 2s infinite alternate;
 }
 
 .thinking-text {
-  color: #4A5568;
-  font-size: 14px;
+  color: #e0f0ff;
+  font-size: 16px;
   text-align: center;
   line-height: 1.4;
   margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .dots span {
   animation: dots 1.5s infinite;
   opacity: 0;
   display: inline-block;
+  font-size: 20px;
 }
 
 .dots span:nth-child(1) { animation-delay: 0.0s; }
@@ -356,14 +354,18 @@ Learning Style: ${answers.style}`;
   100% { opacity: 0; }
 }
 
-.left-column {
-  /* ... existing styles ... */
-  transition: width 0.5s ease;
-}
-
 .left-column.collapsed {
   width: 400px;
+  transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* ... rest of existing styles ... */
+@keyframes pulse-glow {
+  0% { filter: drop-shadow(0 0 2px rgba(50, 130, 255, 0.3)); }
+  100% { filter: drop-shadow(0 0 8px rgba(50, 130, 255, 0.7)); }
+}
+
+@keyframes pulse-box {
+  0% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 20px rgba(50, 130, 255, 0.2); }
+  100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 40px rgba(50, 130, 255, 0.5); }
+}
 </style>

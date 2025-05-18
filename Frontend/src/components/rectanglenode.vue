@@ -3,6 +3,7 @@
     <div 
       class="node-container"
       :class="{ selected, hovered: isHovered }"
+      :data-node-id="node.node_id"
       @mouseenter="isHovered = true"
       @mouseleave="isHovered = false"
     >

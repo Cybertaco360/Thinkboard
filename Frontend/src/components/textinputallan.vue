@@ -4,7 +4,7 @@
       v-model="inputText"
       class="text-input"
       type="text"
-      placeholder="let's create!"
+      :placeholder="placeholder || 'let\'s create!'"
       @keyup.enter="handleSubmit"
       :disabled="isLoading"
     />
@@ -16,8 +16,12 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from 'vue';
+import { ref, defineEmits, defineProps } from 'vue';
 import { Send } from 'lucide-vue-next';
+
+const props = defineProps({
+  placeholder: String
+});
 
 const emit = defineEmits(['submit']);
 const inputText = ref('');
@@ -120,19 +124,35 @@ async function handleSubmit() {
   width: 90%;
   padding-right: 25px;
   padding-left: 16px;
-  padding-top:8px;
-  padding-bottom: 8px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   border: none;
   border-radius: 20px;
   font-size: 1.1rem;
   outline: none;
-  background: #f5f7fa;
-  color: #222;
+  background: rgba(20, 35, 60, 0.6);
+  color: #e0f0ff;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(50, 130, 255, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(100, 170, 255, 0.2);
+}
+
+.text-input::placeholder {
+  color: rgba(200, 220, 255, 0.5);
+  font-style: italic;
+  font-weight: 300;
+}
+
+.text-input:focus {
+  box-shadow: 0 0 20px rgba(50, 130, 255, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.2);
+  border-color: rgba(100, 170, 255, 0.4);
 }
 
 .input-wrapper {
   position: relative;
   width: 100%;
+  max-width: 500px;
 }
 
 .send-button {
@@ -144,15 +164,16 @@ async function handleSubmit() {
   border: none;
   cursor: pointer;
   padding: 8px;
-  color: #666;
+  color: rgba(200, 220, 255, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .send-button:hover:not(:disabled) {
-  color: #222;
+  color: rgba(200, 220, 255, 1);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .send-button:disabled {
@@ -164,9 +185,9 @@ async function handleSubmit() {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(100, 170, 255, 0.2);
   border-radius: 50%;
-  border-top-color: #666;
+  border-top-color: rgba(200, 220, 255, 0.8);
   animation: spin 1s ease-in-out infinite;
 }
 

@@ -1,40 +1,44 @@
 <script setup>
 const emit = defineEmits(['close']);
-
-const shortcuts = [
-  { keys: ['Ctrl', 'Z'], description: 'Undo last action' },
-  { keys: ['Ctrl', 'Y'], description: 'Redo last undone action' },
-  { keys: ['Ctrl', 'A'], description: 'Select all nodes' },
-  { keys: ['Delete'], description: 'Delete selected node(s)' },
-  { keys: ['Escape'], description: 'Clear selection / Close menus' },
-  { keys: ['T'], description: 'Toggle light/dark theme' },
-  { keys: ['M'], description: 'Toggle minimap' },
-  { keys: ['?'], description: 'Show keyboard shortcuts' },
-  { keys: ['Ctrl', 'Space'], description: 'Reset zoom and pan' },
-  { keys: ['Shift', 'Click'], description: 'Add to selection' },
-  { keys: ['Right-click'], description: 'Open context menu' },
-  { keys: ['Mouse wheel'], description: 'Zoom in/out' },
-];
 </script>
 
 <template>
   <div class="shortcuts-overlay" @click="$emit('close')">
     <div class="shortcuts-modal" @click.stop>
-      <div class="modal-header">
-        <h2>Keyboard Shortcuts</h2>
-        <button class="close-button" @click="$emit('close')">✕</button>
+      <h2>Keyboard Shortcuts</h2>
+      
+      <div class="shortcuts-section">
+        <h3>Navigation</h3>
+        <div class="shortcut"><kbd>Space</kbd> + <kbd>Drag</kbd> Reset zoom and pan</div>
+        <div class="shortcut"><kbd>Mouse Wheel</kbd> Zoom in/out</div>
+        <div class="shortcut"><kbd>Drag Canvas</kbd> Pan the view</div>
       </div>
-      <div class="shortcuts-list">
-        <div v-for="(shortcut, index) in shortcuts" :key="index" class="shortcut-item">
-          <div class="keys">
-            <span v-for="(key, keyIndex) in shortcut.keys" :key="keyIndex" class="key">
-              {{ key }}
-              <span v-if="keyIndex < shortcut.keys.length - 1" class="key-plus">+</span>
-            </span>
-          </div>
-          <div class="description">{{ shortcut.description }}</div>
-        </div>
+      
+      <div class="shortcuts-section">
+        <h3>Nodes</h3>
+        <div class="shortcut"><kbd>Right-Click</kbd> Open context menu</div>
+        <div class="shortcut"><kbd>Ctrl</kbd> + <kbd>A</kbd> Select all nodes</div>
+        <div class="shortcut"><kbd>Shift</kbd> + <kbd>Click</kbd> Multi-select nodes</div>
+        <div class="shortcut"><kbd>Delete</kbd> Delete selected nodes</div>
       </div>
+      
+      <div class="shortcuts-section">
+        <h3>Connections</h3>
+        <div class="shortcut"><kbd>Alt</kbd> + <kbd>Drag</kbd> Draw connection from node</div>
+        <div class="shortcut"><kbd>Ctrl</kbd> + <kbd>L</kbd> Connect selected nodes</div>
+      </div>
+      
+      <div class="shortcuts-section">
+        <h3>Interface</h3>
+        <div class="shortcut"><kbd>T</kbd> Toggle dark/light theme</div>
+        <div class="shortcut"><kbd>M</kbd> Toggle minimap</div>
+        <div class="shortcut"><kbd>Ctrl</kbd> + <kbd>Z</kbd> Undo</div>
+        <div class="shortcut"><kbd>Ctrl</kbd> + <kbd>Y</kbd> Redo</div>
+        <div class="shortcut"><kbd>?</kbd> Show/hide this help</div>
+        <div class="shortcut"><kbd>Esc</kbd> Close dialogs/selection</div>
+      </div>
+      
+      <button class="close-button" @click="$emit('close')">Close</button>
     </div>
   </div>
 </template>
