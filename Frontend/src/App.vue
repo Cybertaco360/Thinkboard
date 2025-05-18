@@ -50,8 +50,6 @@ const onMouseDown = (e, node) => {
 console.log('Rendering nodes:', nodes);
 
 // Add some initial test nodes to see if rendering works
-isLoggedIn.value = true; // Auto-login for testing
-// Debug
 console.log('Initial nodes:', nodes);
 </script>
 
