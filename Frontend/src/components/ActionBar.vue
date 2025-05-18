@@ -11,7 +11,8 @@ const emit = defineEmits([
   'redo',
   'toggle-theme',
   'toggle-minimap',
-  'show-keyboard-shortcuts'
+  'show-keyboard-shortcuts',
+  'logout' // Add logout emit
 ]);
 </script>
 
@@ -33,6 +34,10 @@ const emit = defineEmits([
     <div class="divider"></div>
     <button class="action-button" @click="$emit('show-keyboard-shortcuts')" title="Keyboard Shortcuts (?)">
       <span class="icon">⌨️</span>
+    </button>
+    <div class="divider"></div>
+    <button class="action-button logout-button" @click="$emit('logout')" title="Logout">
+      <span class="icon">🚪</span>
     </button>
   </div>
 </template>
@@ -78,5 +83,14 @@ const emit = defineEmits([
 
 .icon {
   font-size: 18px;
+}
+
+.logout-button {
+  background-color: var(--hover-bg, #f0f0f0);
+}
+
+.logout-button:hover {
+  background-color: var(--error-bg, #ffebee);
+  color: var(--error-color, #d32f2f);
 }
 </style>
