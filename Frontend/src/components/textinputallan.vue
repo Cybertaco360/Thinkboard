@@ -6,9 +6,11 @@
       type="text"
       placeholder="let's create!"
       @keyup.enter="handleSubmit"
+      :disabled="isLoading"
     />
-    <button class="send-button" @click="handleSubmit">
-      <Send size="20" />
+    <button class="send-button" @click="handleSubmit" :disabled="isLoading">
+      <span v-if="isLoading" class="loading-spinner"></span>
+      <Send v-else size="20" />
     </button>
   </div>
 </template>
@@ -17,7 +19,7 @@
 import { ref, defineEmits } from 'vue';
 import { Send } from 'lucide-vue-next';
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(['nodes-update']);
 const inputText = ref('');
 
 async function handleSubmit() {
@@ -44,7 +46,7 @@ async function handleSubmit() {
 
 .text-input {
   width: 90%;
-  padding-right: 25px; /* Make room for the button */
+  padding-right: 25px;
   padding-left: 16px;
   padding-top:8px;
   padding-bottom: 8px;
@@ -77,7 +79,26 @@ async function handleSubmit() {
   transition: color 0.2s;
 }
 
-.send-button:hover {
+.send-button:hover:not(:disabled) {
   color: #222;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #666;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
