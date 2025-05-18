@@ -74,12 +74,12 @@ console.log('Initial nodes:', nodes);
                 position: 'absolute',
                 left: node.x + 'px',
                 top: node.y + 'px',
-                cursor: 'grab',
                 userSelect: 'none'
               }"
-              @mousedown="e => onMouseDown(e, node)"
+              :text="node.text"
+              :information="node.information"
+              @mousedown.stop="e => onMouseDown(e, node)"
             >
-              {{ node.text }}
             </Rectangular>
             <LineConnector
               v-for="(node, idx) in nodes.slice(0, -1)"
