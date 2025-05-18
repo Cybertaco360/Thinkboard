@@ -1,6 +1,8 @@
 extern crate dotenv;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::http::header;
+use actix_cors::Cors;
 use std::collections::HashMap;
 use std::future::IntoFuture;
 use serde::{Serialize,Deserialize};
@@ -13,6 +15,8 @@ use std::path::Path;
 use std::fs;
 use mongodb::bson::doc;
 use mongodb::bson::DateTime;
+
+
 #[derive(Deserialize)]
 struct Config {
     prompt: String,
@@ -95,7 +99,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // Start the web server
     HttpServer::new(move || {
+let cors = Cors::default()
+    .allowed_origin("http://localhost:5173")
+    .allowed_methods(vec!["GET", "POST"])
+    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+    .allowed_header(header::CONTENT_TYPE)
+    .max_age(3600);
+
         App::new()
+        .wrap(cors)
             .app_data(web::Data::new(AppState {
                 gemini_client: client.clone(),
             }))
@@ -119,26 +131,80 @@ async fn hello() -> impl Responder {
 #[post("/generate")]
 async fn generate_content(config: web::Json<Config>, data: web::Data<AppState>) -> impl Responder {
     let client = &data.gemini_client;
-    
+
     match client.generate_content()
-        .with_system_prompt("You are a helpful AI assistant. Provide clear, concise, and accurate responses.")
+        .with_system_prompt(r#"You are a helpful AI assistant that creates timelines and roadmaps and such, you are to analyze data and then return roadmaps and timelines. Provide your response as a single JSON array of nodes. Each node must use this schema: { "node_id": #, "x": X-COORDINATE, "y": Y-COORDINATE, "category":NUMBER, "text": "TEXT THAT WILL BE DISPLAYED ON THE NODE", "connected": [], "information": "Information at this certain point" }. Important: All nodes must have an empty connected array - do not create any connections between nodes. Do not put or return in a codeblock. Make sure that there's no ```json ``` or anything like that. Do not return anything except the JSON array. Each Node has a width of 270px and a height of 100px, the X and Y you are going to be providing is always going to be in the unit PX"#)
         .with_user_message(&config.prompt)
         .execute()
         .await {
             Ok(response) => {
-                web::Json(Response {
-                    message: response.text(),
-                })
+                let mut text = response.text();
+                println!("Raw response from Gemini: {}", text);
+                
+                // Strip markdown code block markers if present
+                if text.contains("```") {
+                    text = text.replace("```json", "").replace("```", "");
+                }
+                
+                text = text.trim().to_string();
+                
+                // Try to parse as JSON to validate it
+                let parsed_result = serde_json::from_str::<serde_json::Value>(&text);
+                
+                match parsed_result {
+                    Ok(json_value) => {
+                        if json_value.is_array() {
+                            // If it's a valid JSON array, return it directly
+                            return HttpResponse::Ok()
+                                .content_type("application/json")
+                                .body(text);
+                        } else if json_value.is_object() {
+                            // If it's a single JSON object, wrap it in an array
+                            let wrapped = format!("[{}]", text);
+                            return HttpResponse::Ok()
+                                .content_type("application/json")
+                                .body(wrapped);
+                        }
+                    },
+                    Err(e) => {
+                        println!("JSON parsing error: {}", e);
+                    }
+                }
+                
+                // If we get here, it's not a valid JSON - create a fallback node
+                let fallback_nodes = serde_json::json!([{
+                    "node_id": 1,
+                    "x": 100,
+                    "y": 100,
+                    "text": "AI Response Parsing Error",
+                    "connected": [],
+                    "information": format!("Could not parse AI response as JSON. Raw text: {}", text),
+                    "category": 3
+                }]);
+                
+                HttpResponse::Ok()
+                    .content_type("application/json")
+                    .json(fallback_nodes)
             },
             Err(e) => {
-                // Handle errors if the API call fails
-                web::Json(Response {
-                    message: format!("Error generating content: {}", e),
-                })
+                let error_response = serde_json::json!([{
+                    "node_id": 1,
+                    "x": 100,
+                    "y": 100,
+                    "text": "API Error",
+                    "connected": [],
+                    "information": format!("API call failed: {}", e),
+                    "category": 3
+                }]);
+                
+                HttpResponse::InternalServerError()
+                    .content_type("application/json")
+                    .json(error_response)
             }
         }
 }
-#[post("/signin")]
+
+#[post("/login")]
 async fn sign_in(credentials: web::Json<SignInRequest>, data: web::Data<AppState>) -> impl Responder {
     // Get MongoDB connection string from environment
     let mongodb_uri = match env::var("MONGODB_URI") {

@@ -43,7 +43,8 @@ import { defineProps, defineEmits, ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 const userStore = useUserStore();
 const props = defineProps({ visible: Boolean, type: String });
-const emit = defineEmits(['close']);
+// Add 'login-success' to the emits array
+const emit = defineEmits(['close', 'login-success']);
 
 // Log In
 const loginEmail = ref('');
@@ -56,7 +57,30 @@ const signupPassword = ref('');
 const signupPassword2 = ref('');
 const signupError = ref('');
 
+const emitLogin = () => {
+  if (!loginEmail.value || !loginPassword.value) {
+    alert("Please fill in all fields");
+    return;
+  }
+  
+  emit('login-success', { 
+    email: loginEmail.value, 
+    password: loginPassword.value 
+  });
+};
 
+const emitSignup = () => {
+  if (!signupName.value || !signupEmail.value || !signupPassword.value) {
+    signupError.value = "Please fill in all fields";
+    return;
+  }
+  
+  emit('signup-success', {
+    name: signupName.value,
+    email: signupEmail.value,
+    password: signupPassword.value
+  });
+};
 
 async function handleSignup() {
   const data = {
@@ -123,12 +147,15 @@ async function handleLogin() {
   if (response.ok) {
     const result = await response.json();
     if (result.success) {
-      // Store user info in Pinia
-      userStore.login({
-        username: result.username, // or result.name if that's what your backend returns
-        email: result.email
-      });
-      emit('login-success');
+      // Store user info in Pinia (if you're using Pinia)
+      if (typeof userStore.login === 'function') {
+        userStore.login({
+          username: result.username || result.name,
+          email: result.email
+        });
+      }
+      // Pass credentials with the event!
+      emit('login-success', data);
       emit('close');
     } else {
       alert('Login failed: ' + result.message);
