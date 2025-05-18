@@ -81,7 +81,7 @@ const transformStyle = computed(() => {
 watch(isDarkTheme, (newValue) => {
   document.body.classList.toggle('dark-theme', newValue);
   localStorage.setItem('darkTheme', newValue);
-});
+});true
 
 // Authentication handlers
 const handleLogin = async (credentials) => {
@@ -505,11 +505,11 @@ onMounted(() => {
           
           <!-- Zoom controls -->
           <div class="zoom-controls">
-            <button @click="handleZoom(-1)" title="Zoom In">+</button>
+            <button @click="handleZoom(-1)" title="Zoom In">-</button>
             <button @click="zoomLevel = 1; panOffset.x = 0; panOffset.y = 0" title="Reset Zoom">
               {{ Math.round(zoomLevel * 100) }}%
             </button>
-            <button @click="handleZoom(1)" title="Zoom Out">-</button>
+            <button @click="handleZoom(1)" title="Zoom Out">+</button>
           </div>
           
           <!-- MiniMap -->

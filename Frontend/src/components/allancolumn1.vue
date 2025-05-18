@@ -8,7 +8,7 @@
         <p class="info-text">{{ questions[currentQuestion] }}</p>
       </div>
       <div v-else class="thinking-box">
-        <p class="thinking-text">Processing your journey<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+        <p class="thinking-text">Accompanying on your journey<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
       </div>
     </div>
 
@@ -142,7 +142,7 @@ const handleAnswer = async (answer) => {
     // Cinematic pause before collapsing
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    const finalPrompt = `Create a mind map for the following:
+    const finalPrompt = `Create a timeline or something of assistance for the following:
 Goal: ${answers.goal}
 Prior Experience: ${answers.experience}
 Time Commitment: ${answers.timeCommitment}
