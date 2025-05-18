@@ -29,6 +29,13 @@
 </template>
 
 <script setup>
+function scrollDown() {
+  // Scroll to the Demo Video section smoothly
+  const demoSection = document.querySelector('.demo-section');
+  if (demoSection) {
+    demoSection.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 const emit = defineEmits(['open-sidepan', 'open-signup']);
 </script>
 
