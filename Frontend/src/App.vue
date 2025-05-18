@@ -106,14 +106,13 @@ console.log('Initial nodes:', nodes);
 }
 
 .graph-scroll-container {
-  width: 80vw;
-  height: 80vh;
+  width: 74vw;
+  height: 99vh;
   border: 2px solid #b3e0ff;
   border-radius: 16px;
   overflow: auto;
   background: #f7fbff;
-  position: relative;
-  margin: 32px auto 0 auto;
+  margin-left: auto;
 }
 
 .graph-inner-area {
