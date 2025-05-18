@@ -7,29 +7,47 @@
       @mouseleave="isHovered = false"
     >
       <div class="category-indicator" :style="{ backgroundColor: color }">
-        {{ category }}
+        {{ category || 'Unknown' }}
       </div>
-      <div class="node-title">{{ text }}</div>
+      <div class="node-title">{{ displayText }}</div>
       <div class="node-info-preview" @click.stop="toggleInfo">
-        {{ information.length > 60 ? information.substring(0, 60) + '...' : information }}
+        {{ displayInfo.length > 60 ? displayInfo.substring(0, 60) + '...' : displayInfo }}
         <button class="info-toggle" :class="{ 'is-open': showFullInfo }">
           {{ showFullInfo ? '▲' : '▼' }}
         </button>
       </div>
       <div v-if="showFullInfo" class="node-full-info" @click.stop>
-        {{ information }}
+        {{ displayInfo }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
+  node: {
+    type: Object,
+    required: true,
+    validator: (value) => {
+      if (typeof value !== 'object' || value === null) {
+        console.error('Invalid node prop:', value);
+        return false;
+      }
+      
+      if (!value.hasOwnProperty('node_id') || !value.hasOwnProperty('text')) {
+        console.error('Node missing required properties:', value);
+        return false;
+      }
+      
+      return true;
+    }
+  },
   text: {
     type: String,
-    required: true
+    required: true,
+    default: 'Untitled Node'
   },
   information: {
     type: String,
@@ -47,6 +65,15 @@ const props = defineProps({
     type: String,
     default: '#666'
   }
+});
+
+// Add a computed property to handle possible undefined text
+const displayText = computed(() => props.text || 'Untitled Node');
+const displayInfo = computed(() => props.information || 'No additional information available');
+
+// You can also add a fallback computed property for safe access
+const nodeText = computed(() => {
+  return props.node && typeof props.node === 'object' ? props.node.text : 'Invalid Node';
 });
 
 const isHovered = ref(false);

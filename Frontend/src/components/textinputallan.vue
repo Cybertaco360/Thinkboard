@@ -19,15 +19,87 @@
 import { ref, defineEmits } from 'vue';
 import { Send } from 'lucide-vue-next';
 
-const emit = defineEmits(['nodes-update']);
+const emit = defineEmits(['submit']);
 const inputText = ref('');
+const isLoading = ref(false);
 
 async function handleSubmit() {
   if (!inputText.value.trim()) return;
   
-  // Just emit the answer, don't call API
-  emit('submit', inputText.value.trim());
-  inputText.value = ''; // Clear input after submission
+  isLoading.value = true;
+  try {
+    // Send the user's text to the backend API
+    const response = await fetch('http://127.0.0.1:8080/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ prompt: inputText.value.trim() }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    // Use response.json() instead of text() to ensure proper JSON parsing
+    const data = await response.json();
+    console.log('Parsed API response:', data);
+    
+    // Ensure we're working with an array of nodes
+    if (Array.isArray(data)) {
+      // Check if we have an array of characters or actual node objects
+      if (data.length > 0 && typeof data[0] === 'string') {
+        console.error('Received array of characters instead of node objects:', data);
+        emit('submit', [{
+          node_id: Date.now(),
+          x: 100,
+          y: 100,
+          text: 'Error: Invalid response format',
+          information: 'Received text array instead of node objects',
+          connected: [],
+          category: 3
+        }]);
+      } else {
+        // We have proper node objects
+        emit('submit', data);
+      }
+    } else if (data && typeof data === 'object') {
+      // Handle non-array object response
+      if (data.error) {
+        console.error('API error:', data.error);
+      }
+      // Try to convert to array if possible
+      const nodeArray = data.nodes || [data];
+      emit('submit', nodeArray);
+    } else {
+      // Fallback for any other unexpected format
+      emit('submit', [{
+        node_id: Date.now(),
+        x: 100,
+        y: 100,
+        text: 'Unexpected Data Format',
+        information: 'The API returned data in an unexpected format',
+        connected: [],
+        category: 3
+      }]);
+    }
+  } catch (error) {
+    console.error('Error submitting prompt:', error);
+    // Create an error node to visualize the issue
+    emit('submit', [{ 
+      node_id: Date.now(),
+      x: 100,
+      y: 100,
+      text: "Error processing request",
+      connected: [],
+      information: error.message,
+      category: 3
+    }]);
+  } finally {
+    inputText.value = ''; // Clear input after submission
+    isLoading.value = false;
+  }
 }
 </script>
 

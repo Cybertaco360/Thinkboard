@@ -19,19 +19,6 @@
       <Textinputallan @submit="handleAnswer"/>
     </div>
   </div>
-
-  <div class="nodes-container">
-    <rectangle
-      v-for="node in nodes"
-      :key="node.node_id"
-      :node="node"
-      :style="{
-        position: 'absolute',
-        left: `${node.x+350}px`,
-        top: `${node.y}px`
-      }"
-    />
-  </div>
 </template>
 
 <script setup>
@@ -114,9 +101,6 @@ const handleAnswer = async (answer) => {
     // Wait 2 seconds before collapsing column
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Wait 2 more seconds before calling API
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     const finalPrompt = `Create a mind map for the following:
 Goal: ${answers.goal}
 Prior Experience: ${answers.experience}
@@ -124,7 +108,63 @@ Time Commitment: ${answers.timeCommitment}
 Depth: ${answers.depth}
 Learning Style: ${answers.style}`;
     
-    emit('nodes-update', finalPrompt);
+    try {
+      // Make API call to get nodes instead of just passing the prompt
+      const response = await fetch('http://127.0.0.1:8080/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ prompt: finalPrompt }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('API response with nodes:', data);
+      
+      // Enhanced validation to ensure we have valid node objects
+      if (Array.isArray(data) && data.length > 0) {
+        // Check if first item is a node object or a character
+        if (typeof data[0] === 'string' || !data[0].hasOwnProperty('node_id')) {
+          console.error('API returned invalid node format:', data);
+          // Return a fallback node instead
+          emit('nodes-update', [{
+            node_id: Date.now(),
+            x: 100,
+            y: 100,
+            text: 'Invalid Node Format',
+            information: 'The API returned data in an invalid format',
+            connected: [],
+            category: 3
+          }]);
+        } else {
+          // We have valid node objects
+          emit('nodes-update', data);
+        }
+      } else if (data && typeof data === 'object') {
+        // Try to handle object response
+        const nodeArray = data.nodes || [data];
+        emit('nodes-update', nodeArray);
+      } else {
+        throw new Error('Unexpected response format');
+      }
+    } catch (error) {
+      console.error('Error getting nodes from API:', error);
+      // Create an error node if API call fails
+      emit('nodes-update', [{
+        node_id: Date.now(),
+        x: 100,
+        y: 100,
+        text: "Error processing request",
+        connected: [],
+        information: error.message,
+        category: 3
+      }]);
+    }
   }
 };
 </script>

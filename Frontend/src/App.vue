@@ -115,6 +115,11 @@ const handleSignup = async (userData) => {
 
 // Mouse event handlers
 const onMouseDown = (e, node) => {
+  if (!node || typeof node !== 'object' || !node.node_id) {
+    console.error('Invalid node object:', node);
+    return;
+  }
+
   if (e.button !== 0) return; // Only handle left clicks
   e.preventDefault();
   

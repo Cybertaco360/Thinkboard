@@ -13,8 +13,26 @@ const nodeHistory = reactive({
  * Validate and normalize node data from API
  */
 function validateNodeSchema(data) {
-  // Handle both array and single object responses
+  // Check if data is already an array or if it needs conversion
   const nodeArray = Array.isArray(data) ? data : [data];
+  
+  // Handle edge case where we might have gotten a string instead of objects
+  if (nodeArray.length > 0 && typeof nodeArray[0] === 'string') {
+    console.error('Received string array instead of node objects:', nodeArray);
+    return [{
+      node_id: Date.now(),
+      x: 100,
+      y: 100,
+      text: 'Error: Received text instead of nodes',
+      connected: [],
+      information: 'The API returned text instead of properly formatted nodes: ' + 
+                  (nodeArray.length > 20 
+                   ? nodeArray.slice(0, 20).join('') + '...' 
+                   : nodeArray.join('')),
+      category: 3,
+      createdAt: new Date()
+    }];
+  }
   
   return nodeArray.map((node, index) => ({
     node_id: node.node_id || Date.now() + index,
