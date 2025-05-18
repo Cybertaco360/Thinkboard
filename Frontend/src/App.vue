@@ -28,9 +28,14 @@ const isDraggingCanvas = ref(false);
 const lastMousePosition = reactive({ x: 0, y: 0 });
 const searchQuery = ref('');
 const selectedNodeIds = ref([]);
-const showMiniMap = ref(true);
+const showMiniMap = ref(false);
 const errorMessage = ref('');
 const showError = ref(false);
+
+// New state variables for line drawing
+const isDrawingLine = ref(false);
+const drawingLineSource = ref(null);
+const drawingLineTarget = ref({ x: 0, y: 0 });
 
 // Viewport dimensions
 const viewportWidth = ref(0);
@@ -122,6 +127,55 @@ const onMouseDown = (e, node) => {
 
   if (e.button !== 0) return; // Only handle left clicks
   e.preventDefault();
+  
+  // If Alt key is pressed, start drawing a line from this node
+  if (e.altKey) {
+    isDrawingLine.value = true;
+    drawingLineSource.value = node;
+    drawingLineTarget.value = { 
+      x: e.clientX - panOffset.x, 
+      y: e.clientY - panOffset.y 
+    };
+    
+    // Handle mouse move for line drawing
+    const onMouseMove = (moveEvent) => {
+      drawingLineTarget.value = { 
+        x: moveEvent.clientX - panOffset.x, 
+        y: moveEvent.clientY - panOffset.y 
+      };
+    };
+    
+    // Handle mouse up to complete line drawing
+    const onMouseUp = (upEvent) => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      
+      // Find if we're over another node
+      const targetElement = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+      const targetNodeElement = targetElement?.closest('.node-container');
+      
+      if (targetNodeElement) {
+        // Get the node ID from the element
+        const targetNodeId = parseInt(targetNodeElement.dataset.nodeId);
+        const targetNode = nodes.find(n => n.node_id === targetNodeId);
+        
+        if (targetNode && targetNode !== drawingLineSource.value) {
+          // Add the connection
+          if (!drawingLineSource.value.connected.includes(targetNode.node_id)) {
+            nodeService.saveState(); // Save current state for undo
+            drawingLineSource.value.connected.push(targetNode.node_id);
+          }
+        }
+      }
+      
+      isDrawingLine.value = false;
+      drawingLineSource.value = null;
+    };
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return;
+  }
   
   // Add selection with shift key
   if (e.shiftKey) {
@@ -219,6 +273,13 @@ const onCanvasMouseUp = () => {
   document.body.style.cursor = 'default';
 };
 
+// Add method to create connections between nodes
+const connectSelectedNodes = () => {
+  if (selectedNodeIds.value.length < 2) return;
+  
+  nodeService.connectNodes(selectedNodeIds.value);
+};
+
 // Context menu actions
 const handleContextMenuAction = (action) => {
   showContextMenu.value = false;
@@ -234,7 +295,9 @@ const handleContextMenuAction = (action) => {
   } else if (action === 'createNote') {
     nodeService.createNode(contextMenuPosition.x, contextMenuPosition.y, zoomLevel.value, panOffset, 4);
   } else if (action === 'connect' && selectedNodeIds.value.length >= 2) {
-    nodeService.connectNodes(selectedNodeIds.value);
+    connectSelectedNodes();
+  } else if (action === 'disconnect' && selectedNodeIds.value.length >= 2) {
+    nodeService.disconnectNodes(selectedNodeIds.value);
   } else if (action === 'delete' && selectedNodeIds.value.length > 0) {
     nodeService.deleteNodes(selectedNodeIds.value);
     selectedNodeIds.value = [];
@@ -270,6 +333,9 @@ const handleKeyDown = (e) => {
       zoomLevel.value = 1;
       panOffset.x = 0;
       panOffset.y = 0;
+    } else if (e.key === 'l' && selectedNodeIds.value.length >= 2) {
+      e.preventDefault();
+      connectSelectedNodes();
     }
   } else {
     if (e.key === 'Delete' && selectedNodeIds.value.length > 0) {
@@ -392,30 +458,49 @@ onMounted(() => {
               @mousedown.stop="e => onMouseDown(e, node)"
               @dblclick.stop="e => { /* Handle node edit */ }"
               :selected="selectedNodeIds.includes(node.node_id)"
+              :node="node"
+              :data-node-id="node.node_id"
+              class="node-container"
             />
             
             <!-- Lines between nodes with animated dashed lines -->
             <template v-for="node in filteredNodes" :key="`${node.node_id}-connections`">
-              <template v-for="connectedId in node.connected" :key="`${node.node_id}-${connectedId}`">
-                <LineConnector
-                  v-if="nodes.find(n => n.node_id === connectedId)"
-                  :rect1="{ 
-                    x: node.x, 
-                    y: node.y, 
-                    width: 270, 
-                    height: 100 
-                  }"
-                  :rect2="{ 
-                    x: nodes.find(n => n.node_id === connectedId).x, 
-                    y: nodes.find(n => n.node_id === connectedId).y, 
-                    width: 270, 
-                    height: 100 
-                  }"
-                  :color="nodeCategories.find(cat => cat.id === node.category)?.color || '#333'"
-                  :animated="true"
-                />
+              <template v-if="node.connected && node.connected.length > 0">
+                <template v-for="connectedId in node.connected" :key="`${node.node_id}-${connectedId}`">
+                  <LineConnector
+                    v-if="nodes.find(n => n.node_id === connectedId)"
+                    :rect1="{ 
+                      x: node.x, 
+                      y: node.y, 
+                      width: 270, 
+                      height: 100 
+                    }"
+                    :rect2="{ 
+                      x: nodes.find(n => n.node_id === connectedId).x, 
+                      y: nodes.find(n => n.node_id === connectedId).y, 
+                      width: 270, 
+                      height: 100 
+                    }"
+                    :color="nodeCategories.find(cat => cat.id === node.category)?.color || '#333'"
+                    :animated="true"
+                  />
+                </template>
               </template>
             </template>
+            
+            <!-- Drawing line preview -->
+            <svg v-if="isDrawingLine && drawingLineSource" class="line-preview" 
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000;">
+              <line 
+                :x1="drawingLineSource.x + 135" 
+                :y1="drawingLineSource.y + 50"
+                :x2="drawingLineTarget.x / zoomLevel"
+                :y2="drawingLineTarget.y / zoomLevel"
+                stroke="var(--primary-color)"
+                stroke-width="2"
+                stroke-dasharray="5,5"
+              />
+            </svg>
           </div>
           
           <!-- Zoom controls -->
@@ -438,7 +523,7 @@ onMounted(() => {
           />
         </div>
         
-        <!-- Context Menu -->
+        <!-- Context Menu with connect/disconnect options -->
         <ContextMenu
           v-if="showContextMenu"
           :x="contextMenuPosition.x"
@@ -449,6 +534,7 @@ onMounted(() => {
             { id: 'createDecision', label: 'New Decision', icon: '❓' },
             { id: 'createNote', label: 'New Note', icon: '📝' },
             { id: 'connect', label: 'Connect Selected', icon: '🔗', disabled: selectedNodeIds.length < 2 },
+            { id: 'disconnect', label: 'Remove Connection', icon: '✂️', disabled: selectedNodeIds.length < 2 },
             { id: 'delete', label: 'Delete Selected', icon: '🗑️', disabled: selectedNodeIds.length === 0 },
           ]"
           @select="handleContextMenuAction"
@@ -470,7 +556,6 @@ onMounted(() => {
     </template>
   </div>
 </template>
-
 <style scoped>
 .app-container {
   --primary-color: #1976d2;
